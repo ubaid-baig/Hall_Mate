@@ -4,6 +4,7 @@ import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/auth_controller.dart';
+import 'package:hall_mate/view/login_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -30,7 +31,7 @@ class SignUpScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {Get.off(LoginScreen());},
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -469,7 +470,7 @@ class SignUpScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: (){Get.off(LoginScreen());},
                       child: Text(
                         'Log in',
                         style: AppTextStyles.titleSmall(

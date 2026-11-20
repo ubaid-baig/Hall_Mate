@@ -3,6 +3,7 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/auth_controller.dart';
 import 'package:get/get.dart';
+import 'package:hall_mate/view/login_screen.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
@@ -27,7 +28,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {Get.off(LoginScreen());},
                     child: const Icon(
                       Icons.arrow_back,
                       size: 24,

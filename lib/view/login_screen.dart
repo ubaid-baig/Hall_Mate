@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/view/forgot_password_screen.dart';
+import 'package:hall_mate/view/sign_up_screen.dart';
 import '../controller/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -160,7 +162,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: (){Get.to(ForgotPasswordScreen());},
                             child: Text(
                               'Forgot password?',
                               style: AppTextStyles.titleSmall(
@@ -235,7 +237,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: (){Get.to(SignUpScreen());},
                       child: Text(
                         'Create an account',
                         style: AppTextStyles.titleSmall(
