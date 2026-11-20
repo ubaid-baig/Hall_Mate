@@ -12,7 +12,8 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
-    AuthController controller = Get.put(AuthController());
+    // AuthController controller = Get.put(AuthController());
+    final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
       backgroundColor: AppColors.bgSurface,

@@ -13,7 +13,8 @@ class LoginScreen extends StatelessWidget {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-    final AuthController controller = Get.put(AuthController());
+    // final AuthController controller = Get.put(AuthController());
+    final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
       backgroundColor: AppColors.bgSurface,
