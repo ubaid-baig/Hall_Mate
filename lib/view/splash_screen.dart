@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
+import 'package:hall_mate/constants/app_text_styles.dart';
+
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
@@ -10,10 +13,60 @@ class SplashScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(height: sh * 0.33),
+          
+              // Logo
+              Image.asset(
+                AppAssets.logo,
+                width: sw * 0.26,
+                height: sw * 0.26,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(height: sh * 0.03),
+          
+              // App name (Heading/H1)
+              Text(
+                'Hall Mate',
+                style: AppTextStyles.h1(color: AppColors.textOnPrimary),
+              ),
+              SizedBox(height: sh * 0.012),
+          
+              // Tagline (Body/Medium)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: sw * 0.18),
+                child: Text(
+                  'Find, negotiate and book\nthe right venue for your event',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodyMedium(color: AppColors.textOnPrimaryMute),
+                ),
+              ),
+          
+              SizedBox(height: sh * 0.19),
+          
+              // Progress bar
+              SizedBox(
+                width: sw * 0.28,
+                child: LinearProgressIndicator(
+                  // value: 0.15,
+                  minHeight: 3,
+                  borderRadius: BorderRadius.circular(4),
+                  color: AppColors.accent,
+                  backgroundColor: AppColors.textOnPrimary.withOpacity(0.2),
+                ),
+              ),
+              SizedBox(height: sh * 0.015),
+          
+              // Categories (Label/Tiny)
+              Text(
+                'Ballrooms · Banquets · Outdoor lawns',
+                style: AppTextStyles.labelTiny(color: AppColors.textOnPrimaryMute),
+              ),
+            ],
+          ),
         ),
       ),
     );
