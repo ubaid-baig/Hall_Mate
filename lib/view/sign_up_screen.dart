@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/auth_controller.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -10,6 +12,7 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
+    AuthController controller = Get.put(AuthController());
 
     return Scaffold(
       backgroundColor: AppColors.bgSurface,
@@ -121,7 +124,7 @@ class SignUpScreen extends StatelessWidget {
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Image.asset(
@@ -364,38 +367,42 @@ class SignUpScreen extends StatelessWidget {
 
                 Text('Password', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
-                TextField(
-                  textInputAction: TextInputAction.done,
-                  obscureText: true,
-                  style: AppTextStyles.bodyLarge(),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.bgScreen,
-                    prefixIcon: const Icon(
-                      Icons.lock_outline_rounded,
-                      size: 20,
-                      color: AppColors.textMuted,
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.remove_red_eye_outlined,
+                Obx(
+                  () => TextField(
+                    textInputAction: TextInputAction.done,
+                    obscureText: controller.isObscure.value,
+                    style: AppTextStyles.bodyLarge(),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: AppColors.bgScreen,
+                      prefixIcon: const Icon(
+                        Icons.lock_outline_rounded,
+                        size: 20,
                         color: AppColors.textMuted,
                       ),
-                    ),
-                    hintText: 'At least 8 characters',
-                    hintStyle: AppTextStyles.bodyLarge(
-                      color: AppColors.textMuted,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderStrong,
+                      suffixIcon: IconButton(
+                        onPressed: controller.toggleObscure,
+                        icon: Icon(
+                          controller.isObscure.value
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.textMuted,
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      hintText: 'At least 8 characters',
+                      hintStyle: AppTextStyles.bodyLarge(
+                        color: AppColors.textMuted,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: AppColors.borderStrong,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
                     ),
                   ),
                 ),

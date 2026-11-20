@@ -89,7 +89,7 @@ class LoginScreen extends StatelessWidget {
                       Text('Password', style: AppTextStyles.titleSmall()),
                       SizedBox(height: sh * 0.01),
                       Obx(
-                            () => TextField(
+                        () => TextField(
                           textInputAction: TextInputAction.done,
                           obscureText: controller.isObscure.value,
                           style: AppTextStyles.bodyLarge(),

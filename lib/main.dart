@@ -13,8 +13,8 @@ class Main extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // home: SplashScreen(),
-      home: LoginScreen(),
-      // home: ForgotPasswordScreen(),
+      // home: LoginScreen(),
+      home: ForgotPasswordScreen(),
       // home: SignUpScreen(),
       debugShowCheckedModeBanner: false,
     );
