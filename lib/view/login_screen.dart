@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import '../controller/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -11,6 +13,7 @@ class LoginScreen extends StatelessWidget {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final AuthController controller = Get.put(AuthController());
 
     return Scaffold(
       backgroundColor: AppColors.bgSurface,
@@ -85,39 +88,43 @@ class LoginScreen extends StatelessWidget {
 
                       Text('Password', style: AppTextStyles.titleSmall()),
                       SizedBox(height: sh * 0.01),
-                      TextField(
-                        textInputAction: TextInputAction.done,
-                        obscureText: true,
-                        style: AppTextStyles.bodyLarge(),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: AppColors.bgScreen,
-                          prefixIcon: const Icon(
-                            Icons.lock_outline_rounded,
-                            size: 20,
-                            color: AppColors.textMuted,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.remove_red_eye_outlined,
+                      Obx(
+                            () => TextField(
+                          textInputAction: TextInputAction.done,
+                          obscureText: controller.isObscure.value,
+                          style: AppTextStyles.bodyLarge(),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: AppColors.bgScreen,
+                            prefixIcon: const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 20,
                               color: AppColors.textMuted,
                             ),
-                          ),
-                          hintText: 'Your password',
-                          hintStyle: AppTextStyles.bodyLarge(
-                            color: AppColors.textMuted,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.borderStrong,
+                            suffixIcon: IconButton(
+                              onPressed: controller.toggleObscure,
+                              icon: Icon(
+                                controller.isObscure.value
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: AppColors.textMuted,
+                              ),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.primary,
+                            hintText: 'Your password',
+                            hintStyle: AppTextStyles.bodyLarge(
+                              color: AppColors.textMuted,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.borderStrong,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ),
@@ -133,7 +140,7 @@ class LoginScreen extends StatelessWidget {
                                   width: 24,
                                   height: 24,
                                   child: Checkbox(
-                                    value: false  ,
+                                    value: false,
                                     activeColor: AppColors.primary,
                                     onChanged: (value) {},
                                   ),
@@ -227,14 +234,14 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: (){},
+                      onPressed: () {},
                       child: Text(
                         'Create an account',
                         style: AppTextStyles.titleSmall(
-                        color: AppColors.primary,
+                          color: AppColors.primary,
                         ),
-                      )
-                    )
+                      ),
+                    ),
                   ],
                 ),
               ],
