@@ -5,7 +5,12 @@ import 'package:hall_mate/view/forgot_password_screen.dart';
 import 'package:hall_mate/view/login_screen.dart';
 import 'package:hall_mate/view/sign_up_screen.dart';
 import 'package:hall_mate/view/splash_screen.dart';
+import 'package:hall_mate/view/home_screen.dart';
+import 'package:hall_mate/view/manager_dashboard.dart';
+import 'package:hall_mate/view/manager_dashboard_under_review.dart';
+import 'package:hall_mate/view/venue_details_screen.dart';
 import 'package:get/get.dart';
+
 
 import 'controller/auth_controller.dart';
 import 'controller/nav_controller.dart';
@@ -40,7 +45,10 @@ class Main extends StatelessWidget {
       // home: LoginScreen(),
       // home: ForgotPasswordScreen(),
       // home: SignUpScreen(),
-      home: NavBarWidget(),
+      // home: NavBarWidget(),
+      // home:const ManagerDashboardScreen() ,
+      // home: const ManagerDashboardReviewScreen(),
+      home: const VenueDetailsScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
