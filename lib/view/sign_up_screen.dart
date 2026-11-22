@@ -13,11 +13,12 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
+    final colors = AppColors.of(context);
     // AuthController controller = Get.put(AuthController());
     final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgSurface,
+      backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -35,14 +36,14 @@ class SignUpScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.bgSurface,
-                      border: Border.all(color: AppColors.border),
+                      color: colors.bgSurface,
+                      border: Border.all(color: colors.border),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back,
                       size: 20,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -53,223 +54,301 @@ class SignUpScreen extends StatelessWidget {
                 Text(
                   'Tell us how you\'ll use Hall Mate.',
                   style: AppTextStyles.bodyMedium(
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 SizedBox(height: sh * 0.02),
 
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.bgSurface,
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(9),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryTint,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.search,
-                                      size: 20,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
+                // The two role cards. Obx rebuilds them when isVenueManager changes.
+                Obx(() {
+                  // Read the value once here, then use it for both cards.
+                  final bool isManager = controller.isVenueManager.value;
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Customer card ──
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: controller.selectCustomer,
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isManager
+                                  ? colors.bgSurface
+                                  : colors.primarySoft,
+                              border: Border.all(
+                                color: isManager
+                                    ? colors.border
+                                    : colors.primaryBorder,
+                                width: isManager ? 1 : 2,
                               ),
-                              SizedBox(height: sh * 0.015),
-                              Text(
-                                'Customer',
-                                style: AppTextStyles.titleMedium(),
-                              ),
-                              SizedBox(height: sh * 0.005),
-                              Text(
-                                'I\'m looking for a venue for my event',
-                                style: AppTextStyles.bodySmall(
-                                  color: AppColors.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: sw * 0.03),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.primarySoft,
-                            border: Border.all(
-                              color: AppColors.primary,
-                              width: 2,
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Image.asset(
-                                    AppAssets.logo,
-                                    width: 38,
-                                    height: 38,
-                                    fit: BoxFit.contain,
-                                  ),
-                                  const Icon(
-                                    Icons.check_circle,
-                                    size: 22,
-                                    color: AppColors.primary,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: sh * 0.015),
-                              Text(
-                                'Venue manager',
-                                style: AppTextStyles.titleMedium(),
-                              ),
-                              SizedBox(height: sh * 0.005),
-                              Text(
-                                'I run a venue and want bookings',
-                                style: AppTextStyles.bodySmall(
-                                  color: AppColors.textSecondary,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(9),
+                                      decoration: BoxDecoration(
+                                        color: colors.primaryTint,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.search,
+                                        size: 20,
+                                        color: colors.primaryInk,
+                                      ),
+                                    ),
+                                    if (!isManager)
+                                      Icon(
+                                        Icons.check_circle,
+                                        size: 22,
+                                        color: colors.primaryBorder,
+                                      ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: sh * 0.015),
+                                Text(
+                                  'Customer',
+                                  style: AppTextStyles.titleMedium(),
+                                ),
+                                SizedBox(height: sh * 0.005),
+                                Text(
+                                  'I\'m looking for a venue for my event',
+                                  style: AppTextStyles.bodySmall(
+                                    color: isManager
+                                        ? colors.textMuted
+                                        : colors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(width: sw * 0.03),
+
+                      // ── Venue manager card ──
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: controller.selectVenueManager,
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isManager
+                                  ? colors.primarySoft
+                                  : colors.bgSurface,
+                              border: Border.all(
+                                color: isManager
+                                    ? colors.primaryBorder
+                                    : colors.border,
+                                width: isManager ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Image.asset(
+                                      AppAssets.logo,
+                                      width: 38,
+                                      height: 38,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    if (isManager)
+                                      Icon(
+                                        Icons.check_circle,
+                                        size: 22,
+                                        color: colors.primaryBorder,
+                                      ),
+                                  ],
+                                ),
+                                SizedBox(height: sh * 0.015),
+                                Text(
+                                  'Venue manager',
+                                  style: AppTextStyles.titleMedium(),
+                                ),
+                                SizedBox(height: sh * 0.005),
+                                Text(
+                                  'I run a venue and want bookings',
+                                  style: AppTextStyles.bodySmall(
+                                    color: isManager
+                                        ? colors.textSecondary
+                                        : colors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
                 SizedBox(height: sh * 0.02),
 
-                Text(
-                  'What type of venue do you run?',
-                  style: AppTextStyles.titleSmall(),
-                ),
-                SizedBox(height: sh * 0.012),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppColors.bgSurface,
-                            border: Border.all(color: AppColors.borderStrong),
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Ballroom',
-                              style: AppTextStyles.titleSmall(),
-                            ),
-                          ),
-                        ),
+                // Venue type chips + helper text + Venue name field.
+                // Only a venue manager sees this whole block.
+                Obx(() {
+                  if (!controller.isVenueManager.value) {
+                    return const SizedBox();
+                  }
+
+                  final String selectedType =
+                      controller.selectedVenueType.value;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'What type of venue do you run?',
+                        style: AppTextStyles.titleSmall(),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            border: Border.all(color: AppColors.primary),
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Banquet',
-                              style: AppTextStyles.titleSmall(
-                                color: AppColors.textOnPrimary,
+                      SizedBox(height: sh * 0.012),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {controller.selectVenueType('Ballroom');},
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: selectedType == 'Ballroom'
+                                      ? colors.primary
+                                      : colors.bgSurface,
+                                  border: Border.all(
+                                    color: selectedType == 'Ballroom'
+                                        ? colors.primary
+                                        : colors.borderStrong,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Ballroom',
+                                    style: AppTextStyles.titleSmall(
+                                      color: selectedType == 'Ballroom'
+                                          ? colors.textOnPrimary
+                                          : null,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppColors.bgSurface,
-                            border: Border.all(color: AppColors.borderStrong),
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Outdoor',
-                              style: AppTextStyles.titleSmall(),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {controller.selectVenueType('Banquet');},
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: selectedType == 'Banquet'
+                                      ? colors.primary
+                                      : colors.bgSurface,
+                                  border: Border.all(
+                                    color: selectedType == 'Banquet'
+                                        ? colors.primary
+                                        : colors.borderStrong,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Banquet',
+                                    style: AppTextStyles.titleSmall(
+                                      color: selectedType == 'Banquet'
+                                          ? colors.textOnPrimary
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {controller.selectVenueType('Outdoor');},
+                              child: Container(
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: selectedType == 'Outdoor'
+                                      ? colors.primary
+                                      : colors.bgSurface,
+                                  border: Border.all(
+                                    color: selectedType == 'Outdoor'
+                                        ? colors.primary
+                                        : colors.borderStrong,
+                                  ),
+                                  borderRadius: BorderRadius.circular(22),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Outdoor',
+                                    style: AppTextStyles.titleSmall(
+                                      color: selectedType == 'Outdoor'
+                                          ? colors.textOnPrimary
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: sh * 0.01),
+                      Text(
+                        'Next you\'ll add per-head menu packages and minimum guests.',
+                        style: AppTextStyles.bodySmall(color: colors.textMuted),
+                      ),
+                      SizedBox(height: sh * 0.02),
+
+                      Text('Venue name', style: AppTextStyles.titleSmall()),
+                      SizedBox(height: sh * 0.01),
+                      TextField(
+                        textInputAction: TextInputAction.next,
+                        style: AppTextStyles.bodyLarge(),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: colors.bgScreen,
+                          prefixIcon: Icon(
+                            Icons.door_front_door_outlined,
+                            size: 20,
+                            color: colors.textMuted,
+                          ),
+                          hintText: 'e.g. Shaan Banquet Hall',
+                          hintStyle: AppTextStyles.bodyLarge(
+                            color: colors.textMuted,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: colors.borderStrong,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(color: colors.primaryBorder),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: sh * 0.01),
-                Text(
-                  'Next you\'ll add per-head menu packages and minimum guests.',
-                  style: AppTextStyles.bodySmall(color: AppColors.textMuted),
-                ),
-                SizedBox(height: sh * 0.02),
-
-                Text('Venue name', style: AppTextStyles.titleSmall()),
-                SizedBox(height: sh * 0.01),
-                TextField(
-                  textInputAction: TextInputAction.next,
-                  style: AppTextStyles.bodyLarge(),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.bgScreen,
-                    prefixIcon: const Icon(
-                      Icons.door_front_door_outlined,
-                      size: 20,
-                      color: AppColors.textMuted,
-                    ),
-                    hintText: 'e.g. Shaan Banquet Hall',
-                    hintStyle: AppTextStyles.bodyLarge(
-                      color: AppColors.textMuted,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderStrong,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primary),
-                    ),
-                  ),
-                ),
-                SizedBox(height: sh * 0.02),
+                      SizedBox(height: sh * 0.02),
+                    ],
+                  );
+                }),
 
                 Text('Full name', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
@@ -279,25 +358,25 @@ class SignUpScreen extends StatelessWidget {
                   style: AppTextStyles.bodyLarge(),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: AppColors.bgScreen,
-                    prefixIcon: const Icon(
+                    fillColor: colors.bgScreen,
+                    prefixIcon: Icon(
                       Icons.person_outline,
                       size: 20,
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     hintText: 'Your full name',
                     hintStyle: AppTextStyles.bodyLarge(
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderStrong,
+                      borderSide: BorderSide(
+                        color: colors.borderStrong,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: colors.primaryBorder),
                     ),
                   ),
                 ),
@@ -311,25 +390,25 @@ class SignUpScreen extends StatelessWidget {
                   style: AppTextStyles.bodyLarge(),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: AppColors.bgScreen,
-                    prefixIcon: const Icon(
+                    fillColor: colors.bgScreen,
+                    prefixIcon: Icon(
                       Icons.email_outlined,
                       size: 20,
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     hintText: 'you@example.com',
                     hintStyle: AppTextStyles.bodyLarge(
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderStrong,
+                      borderSide: BorderSide(
+                        color: colors.borderStrong,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: colors.primaryBorder),
                     ),
                   ),
                 ),
@@ -343,25 +422,25 @@ class SignUpScreen extends StatelessWidget {
                   style: AppTextStyles.bodyLarge(),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: AppColors.bgScreen,
-                    prefixIcon: const Icon(
+                    fillColor: colors.bgScreen,
+                    prefixIcon: Icon(
                       Icons.phone_outlined,
                       size: 20,
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     hintText: '+92 3XX XXXXXXX',
                     hintStyle: AppTextStyles.bodyLarge(
-                      color: AppColors.textMuted,
+                      color: colors.textMuted,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColors.borderStrong,
+                      borderSide: BorderSide(
+                        color: colors.borderStrong,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: colors.primaryBorder),
                     ),
                   ),
                 ),
@@ -370,17 +449,17 @@ class SignUpScreen extends StatelessWidget {
                 Text('Password', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
                 Obx(
-                  () => TextField(
+                      () => TextField(
                     textInputAction: TextInputAction.done,
                     obscureText: controller.isObscure.value,
                     style: AppTextStyles.bodyLarge(),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: AppColors.bgScreen,
-                      prefixIcon: const Icon(
+                      fillColor: colors.bgScreen,
+                      prefixIcon: Icon(
                         Icons.lock_outline_rounded,
                         size: 20,
-                        color: AppColors.textMuted,
+                        color: colors.textMuted,
                       ),
                       suffixIcon: IconButton(
                         onPressed: controller.toggleObscure,
@@ -388,55 +467,66 @@ class SignUpScreen extends StatelessWidget {
                           controller.isObscure.value
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: AppColors.textMuted,
+                          color: colors.textMuted,
                         ),
                       ),
                       hintText: 'At least 8 characters',
                       hintStyle: AppTextStyles.bodyLarge(
-                        color: AppColors.textMuted,
+                        color: colors.textMuted,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: AppColors.borderStrong,
+                        borderSide: BorderSide(
+                          color: colors.borderStrong,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: colors.primaryBorder),
                       ),
                     ),
                   ),
                 ),
                 SizedBox(height: sh * 0.02),
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentSoft,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
+                // Admin-approval note is about venues, so only a venue manager sees it.
+                Obx(() {
+                  if (!controller.isVenueManager.value) {
+                    return const SizedBox();
+                  }
+
+                  return Column(
                     children: [
-                      const Icon(
-                        Icons.verified_user_outlined,
-                        size: 20,
-                        color: AppColors.accentStrongInk,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'New venues stay hidden from search until an admin approves them. You can set up photos and packages while you wait.',
-                          style: AppTextStyles.bodySmall(
-                            color: AppColors.accentInk,
-                          ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: colors.accentSoft,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.verified_user_outlined,
+                              size: 20,
+                              color: colors.accentStrongInk,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'New venues stay hidden from search until an admin approves them. You can set up photos and packages while you wait.',
+                                style: AppTextStyles.bodySmall(
+                                  color: colors.accentInk,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      SizedBox(height: sh * 0.025),
                     ],
-                  ),
-                ),
-                SizedBox(height: sh * 0.025),
+                  );
+                }),
 
                 SizedBox(
                   width: double.infinity,
@@ -444,8 +534,8 @@ class SignUpScreen extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.textOnPrimary,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.textOnPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -453,7 +543,7 @@ class SignUpScreen extends StatelessWidget {
                     child: Text(
                       'Create account',
                       style: AppTextStyles.labelButton(
-                        color: AppColors.textOnPrimary,
+                        color: colors.textOnPrimary,
                       ),
                     ),
                   ),
@@ -466,7 +556,7 @@ class SignUpScreen extends StatelessWidget {
                     Text(
                       'Already have an account?',
                       style: AppTextStyles.bodyMedium(
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                     TextButton(
@@ -474,7 +564,7 @@ class SignUpScreen extends StatelessWidget {
                       child: Text(
                         'Log in',
                         style: AppTextStyles.titleSmall(
-                          color: AppColors.primary,
+                          color: colors.primaryInk,
                         ),
                       ),
                     ),

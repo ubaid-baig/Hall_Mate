@@ -15,11 +15,12 @@ class LoginScreen extends StatelessWidget {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final colors = AppColors.of(context);
     // final AuthController controller = Get.put(AuthController());
     final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgSurface,
+      backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.only(
@@ -50,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                       Text(
                         'Log in to find venues or manage your bookings.',
                         style: AppTextStyles.bodyMedium(
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                       SizedBox(height: sh * 0.03),
@@ -63,26 +64,26 @@ class LoginScreen extends StatelessWidget {
                         style: AppTextStyles.bodyLarge(),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: AppColors.bgScreen,
-                          prefixIcon: const Icon(
+                          fillColor: colors.bgScreen,
+                          prefixIcon: Icon(
                             Icons.email_outlined,
                             size: 20,
-                            color: AppColors.textMuted,
+                            color: colors.textMuted,
                           ),
                           hintText: 'you@example.com',
                           hintStyle: AppTextStyles.bodyLarge(
-                            color: AppColors.textMuted,
+                            color: colors.textMuted,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.borderStrong,
+                            borderSide: BorderSide(
+                              color: colors.borderStrong,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.primary,
+                            borderSide: BorderSide(
+                              color: colors.primaryBorder,
                             ),
                           ),
                         ),
@@ -98,11 +99,11 @@ class LoginScreen extends StatelessWidget {
                           style: AppTextStyles.bodyLarge(),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: AppColors.bgScreen,
-                            prefixIcon: const Icon(
+                            fillColor: colors.bgScreen,
+                            prefixIcon: Icon(
                               Icons.lock_outline_rounded,
                               size: 20,
-                              color: AppColors.textMuted,
+                              color: colors.textMuted,
                             ),
                             suffixIcon: IconButton(
                               onPressed: controller.toggleObscure,
@@ -110,23 +111,23 @@ class LoginScreen extends StatelessWidget {
                                 controller.isObscure.value
                                     ? Icons.visibility_off_outlined
                                     : Icons.visibility_outlined,
-                                color: AppColors.textMuted,
+                                color: colors.textMuted,
                               ),
                             ),
                             hintText: 'Your password',
                             hintStyle: AppTextStyles.bodyLarge(
-                              color: AppColors.textMuted,
+                              color: colors.textMuted,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.borderStrong,
+                              borderSide: BorderSide(
+                                color: colors.borderStrong,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.primary,
+                              borderSide: BorderSide(
+                                color: colors.primaryBorder,
                               ),
                             ),
                           ),
@@ -144,7 +145,7 @@ class LoginScreen extends StatelessWidget {
                                   height: 24,
                                   child: Checkbox(
                                     value: false,
-                                    activeColor: AppColors.primary,
+                                    activeColor: colors.primary,
                                     onChanged: (value) {},
                                   ),
                                 ),
@@ -153,7 +154,7 @@ class LoginScreen extends StatelessWidget {
                                   child: Text(
                                     'Keep me logged in',
                                     style: AppTextStyles.bodyMedium(
-                                      color: AppColors.textSecondary,
+                                      color: colors.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -166,7 +167,7 @@ class LoginScreen extends StatelessWidget {
                             child: Text(
                               'Forgot password?',
                               style: AppTextStyles.titleSmall(
-                                color: AppColors.primary,
+                                color: colors.primaryInk,
                               ),
                             ),
                           ),
@@ -180,8 +181,8 @@ class LoginScreen extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.textOnPrimary,
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.textOnPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -189,7 +190,7 @@ class LoginScreen extends StatelessWidget {
                           child: Text(
                             'Log in',
                             style: AppTextStyles.labelButton(
-                              color: AppColors.textOnPrimary,
+                              color: colors.textOnPrimary,
                             ),
                           ),
                         ),
@@ -203,22 +204,22 @@ class LoginScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.bgScreen,
+                    color: colors.bgScreen,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
                         size: 20,
-                        color: AppColors.primary,
+                        color: colors.primaryInk,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'One login for customers and venue managers. We open the right home for your account.',
                           style: AppTextStyles.bodySmall(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ),
@@ -233,7 +234,7 @@ class LoginScreen extends StatelessWidget {
                     Text(
                       'New to Hall Mate? ',
                       style: AppTextStyles.bodyMedium(
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                     TextButton(
@@ -241,7 +242,7 @@ class LoginScreen extends StatelessWidget {
                       child: Text(
                         'Create an account',
                         style: AppTextStyles.titleSmall(
-                          color: AppColors.primary,
+                          color: colors.primaryInk,
                         ),
                       ),
                     ),

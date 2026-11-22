@@ -12,11 +12,12 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
+    final colors = AppColors.of(context);
     // AuthController controller = Get.put(AuthController());
     final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: AppColors.bgSurface,
+      backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
@@ -29,10 +30,10 @@ class ForgotPasswordScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {Get.off(LoginScreen());},
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back,
                       size: 24,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -40,7 +41,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: colors.border, height: 1),
 
             Expanded(
               child: SingleChildScrollView(
@@ -56,13 +57,13 @@ class ForgotPasswordScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.primarySoft,
+                          color: colors.primarySoft,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.lock_outline_rounded,
                           size: 26,
-                          color: AppColors.primary,
+                          color: colors.primaryInk,
                         ),
                       ),
                       SizedBox(height: sh * 0.02),
@@ -72,7 +73,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                       Text(
                         'We sent a 6-digit code to ali•••@email.com. Enter it below, then choose a new password.',
                         style: AppTextStyles.bodyMedium(
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                       SizedBox(height: sh * 0.025),
@@ -93,20 +94,20 @@ class ForgotPasswordScreen extends StatelessWidget {
                                 decoration: InputDecoration(
                                   counterText: '',
                                   filled: true,
-                                  fillColor: AppColors.bgScreen,
+                                  fillColor: colors.bgScreen,
                                   contentPadding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.borderStrong,
+                                    borderSide: BorderSide(
+                                      color: colors.borderStrong,
                                     ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primary,
+                                    borderSide: BorderSide(
+                                      color: colors.primaryBorder,
                                       width: 2,
                                     ),
                                   ),
@@ -121,15 +122,15 @@ class ForgotPasswordScreen extends StatelessWidget {
                       RichText(
                         text: TextSpan(
                           style: AppTextStyles.bodySmall(
-                            color: AppColors.textMuted,
+                            color: colors.textMuted,
                           ),
-                          children: const [
-                            TextSpan(text: 'Didn\'t get it? '),
+                          children: [
+                            const TextSpan(text: 'Didn\'t get it? '),
                             TextSpan(
                               text: 'Resend in 0:42',
                               style: TextStyle(
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ],
@@ -146,11 +147,11 @@ class ForgotPasswordScreen extends StatelessWidget {
                           style: AppTextStyles.bodyLarge(),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: AppColors.bgScreen,
-                            prefixIcon: const Icon(
+                            fillColor: colors.bgScreen,
+                            prefixIcon: Icon(
                               Icons.lock_outline_rounded,
                               size: 20,
-                              color: AppColors.textMuted,
+                              color: colors.textMuted,
                             ),
                             suffixIcon: IconButton(
                               onPressed: controller.toggleObscure,
@@ -158,23 +159,23 @@ class ForgotPasswordScreen extends StatelessWidget {
                                 controller.isObscure.value
                                     ? Icons.visibility_off_outlined
                                     : Icons.visibility_outlined,
-                                color: AppColors.textMuted,
+                                color: colors.textMuted,
                               ),
                             ),
                             hintText: 'At least 8 characters',
                             hintStyle: AppTextStyles.bodyLarge(
-                              color: AppColors.textMuted,
+                              color: colors.textMuted,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.borderStrong,
+                              borderSide: BorderSide(
+                                color: colors.borderStrong,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.primary,
+                              borderSide: BorderSide(
+                                color: colors.primaryBorder,
                               ),
                             ),
                           ),
@@ -193,26 +194,26 @@ class ForgotPasswordScreen extends StatelessWidget {
                         style: AppTextStyles.bodyLarge(),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: AppColors.bgScreen,
-                          prefixIcon: const Icon(
+                          fillColor: colors.bgScreen,
+                          prefixIcon: Icon(
                             Icons.lock_outline_rounded,
                             size: 20,
-                            color: AppColors.textMuted,
+                            color: colors.textMuted,
                           ),
                           hintText: 'Repeat your new password',
                           hintStyle: AppTextStyles.bodyLarge(
-                            color: AppColors.textMuted,
+                            color: colors.textMuted,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.borderStrong,
+                            borderSide: BorderSide(
+                              color: colors.borderStrong,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(
-                              color: AppColors.primary,
+                            borderSide: BorderSide(
+                              color: colors.primaryBorder,
                             ),
                           ),
                         ),
@@ -237,8 +238,8 @@ class ForgotPasswordScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.textOnPrimary,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.textOnPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -246,7 +247,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   child: Text(
                     'Reset password',
                     style: AppTextStyles.labelButton(
-                      color: AppColors.textOnPrimary,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),

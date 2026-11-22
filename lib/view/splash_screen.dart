@@ -10,15 +10,16 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
+    final colors = AppColors.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: colors.primary,
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
               SizedBox(height: sh * 0.33),
-          
+
               // Logo
               Image.asset(
                 AppAssets.logo,
@@ -27,26 +28,26 @@ class SplashScreen extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
               SizedBox(height: sh * 0.03),
-          
+
               // App name (Heading/H1)
               Text(
                 'Hall Mate',
-                style: AppTextStyles.h1(color: AppColors.textOnPrimary),
+                style: AppTextStyles.h1(color: colors.textOnPrimary),
               ),
               SizedBox(height: sh * 0.012),
-          
+
               // Tagline (Body/Medium)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: sw * 0.18),
                 child: Text(
                   'Find, negotiate and book\nthe right venue for your event',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyMedium(color: AppColors.textOnPrimaryMute),
+                  style: AppTextStyles.bodyMedium(color: colors.textOnPrimaryMute),
                 ),
               ),
-          
+
               SizedBox(height: sh * 0.19),
-          
+
               // Progress bar
               SizedBox(
                 width: sw * 0.28,
@@ -54,16 +55,16 @@ class SplashScreen extends StatelessWidget {
                   // value: 0.15,
                   minHeight: 3,
                   borderRadius: BorderRadius.circular(4),
-                  color: AppColors.accent,
-                  backgroundColor: AppColors.textOnPrimary.withOpacity(0.2),
+                  color: colors.accent,
+                  backgroundColor: colors.textOnPrimary.withOpacity(0.2),
                 ),
               ),
               SizedBox(height: sh * 0.015),
-          
+
               // Categories (Label/Tiny)
               Text(
                 'Ballrooms · Banquets · Outdoor lawns',
-                style: AppTextStyles.labelTiny(color: AppColors.textOnPrimaryMute),
+                style: AppTextStyles.labelTiny(color: colors.textOnPrimaryMute),
               ),
             ],
           ),

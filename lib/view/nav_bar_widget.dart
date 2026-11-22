@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/nav_controller.dart';
 import 'package:hall_mate/view/booking_screen.dart';
 import 'package:hall_mate/view/chat_screen.dart';
 import 'package:hall_mate/view/home_screen.dart';
@@ -13,6 +14,9 @@ class NavBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final NavController navController = Get.find<NavController>();
+
     final List<Widget> screenList = [
       HomeScreen(),
       SearchScreen(),
@@ -21,27 +25,23 @@ class NavBarWidget extends StatelessWidget {
       ProfileScreen(),
     ];
 
-    RxInt currentIndex = 0.obs;
-
     return Scaffold(
-      backgroundColor: AppColors.bgScreen,
-      body: Obx(() => screenList[currentIndex.value]),
+      backgroundColor: colors.bgScreen,
+      body: Obx(() => screenList[navController.currentIndex.value]),
       bottomNavigationBar: Obx(
-            () => BottomNavigationBar(
-          currentIndex: currentIndex.value,
-          onTap: (index) {
-            currentIndex.value = index;
-          },
+        () => BottomNavigationBar(
+          currentIndex: navController.currentIndex.value,
+          onTap: navController.changeIndex,
           type: BottomNavigationBarType.shifting,
           elevation: 1,
-          backgroundColor: AppColors.bgSurface,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.textMuted,
+          backgroundColor: colors.bgSurface,
+          selectedItemColor: colors.primaryInk,
+          unselectedItemColor: colors.textMuted,
           selectedLabelStyle: AppTextStyles.bodySmall(
-            color: AppColors.primary,
+            color: colors.primaryInk,
           ),
           unselectedLabelStyle: AppTextStyles.bodySmall(
-            color: AppColors.textMuted,
+            color: colors.textMuted,
           ),
           items: [
             BottomNavigationBarItem(
@@ -51,8 +51,8 @@ class NavBarWidget extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentIndex.value == 0
-                      ? AppColors.primarySoft
+                  color: navController.currentIndex.value == 0
+                      ? colors.primarySoft
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -67,8 +67,8 @@ class NavBarWidget extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentIndex.value == 1
-                      ? AppColors.primarySoft
+                  color: navController.currentIndex.value == 1
+                      ? colors.primarySoft
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -83,8 +83,8 @@ class NavBarWidget extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentIndex.value == 2
-                      ? AppColors.primarySoft
+                  color: navController.currentIndex.value == 2
+                      ? colors.primarySoft
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -99,8 +99,8 @@ class NavBarWidget extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentIndex.value == 3
-                      ? AppColors.primarySoft
+                  color: navController.currentIndex.value == 3
+                      ? colors.primarySoft
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -115,8 +115,8 @@ class NavBarWidget extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: currentIndex.value == 4
-                      ? AppColors.primarySoft
+                  color: navController.currentIndex.value == 4
+                      ? colors.primarySoft
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),

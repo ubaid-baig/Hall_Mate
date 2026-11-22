@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hall_mate/constants/app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._(); // prevent instantiation
 
+  // If no color is passed, the text takes its color from the app theme
+  // (see app_theme.dart), so it is dark text in light mode and light text
+  // in dark mode automatically.
   static TextStyle _style(double size, FontWeight weight, Color? color) {
     return GoogleFonts.plusJakartaSans(
       fontSize: size,
       fontWeight: weight,
-      color: color ?? AppColors.textPrimary,
+      color: color,
     );
   }
 
