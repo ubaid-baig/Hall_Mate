@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/view/venue_detail_screen.dart';
 import 'package:hall_mate/widgets/photo_placeholder.dart';
 
 /// The small venue card: square photo on the left, details on the right.
@@ -27,63 +29,71 @@ class VenueRowCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colors.bgSurface,
-        border: Border.all(color: colors.border),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          PhotoPlaceholder(
-            photoStyle: photoStyle,
-            width: 80,
-            height: 80,
-            iconSize: 24,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(name, style: AppTextStyles.titleLarge()),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.star_rounded, size: 16, color: colors.iconStar),
-                    const SizedBox(width: 3),
-                    Text(rating, style: AppTextStyles.titleSmall()),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.bodySmall(color: colors.textMuted),
-                ),
-                const SizedBox(height: 6),
-                RichText(
-                  text: TextSpan(
-                    style: AppTextStyles.bodySmall(color: colors.textMuted),
+    return GestureDetector(
+      // Opens the Venue detail screen.
+      // API: send this venue's id along, for example
+      // Get.to(() => VenueDetailScreen(), arguments: venueId)
+      onTap: () {
+        Get.to(() => const VenueDetailScreen());
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.bgSurface,
+          border: Border.all(color: colors.border),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          children: [
+            PhotoPlaceholder(
+              photoStyle: photoStyle,
+              width: 80,
+              height: 80,
+              iconSize: 24,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      const TextSpan(text: 'from '),
-                      TextSpan(
-                        text: price,
-                        style: AppTextStyles.titleMedium(
-                          color: colors.primaryInk,
-                        ),
+                      Expanded(
+                        child: Text(name, style: AppTextStyles.titleLarge()),
                       ),
-                      const TextSpan(text: ' / head'),
+                      const SizedBox(width: 8),
+                      Icon(Icons.star_rounded, size: 16, color: colors.iconStar),
+                      const SizedBox(width: 3),
+                      Text(rating, style: AppTextStyles.titleSmall()),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodySmall(color: colors.textMuted),
+                  ),
+                  const SizedBox(height: 6),
+                  RichText(
+                    text: TextSpan(
+                      style: AppTextStyles.bodySmall(color: colors.textMuted),
+                      children: [
+                        const TextSpan(text: 'from '),
+                        TextSpan(
+                          text: price,
+                          style: AppTextStyles.titleMedium(
+                            color: colors.primaryInk,
+                          ),
+                        ),
+                        const TextSpan(text: ' / head'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/venue_search_controller.dart';
 import 'package:hall_mate/widgets/venue_card.dart';
+import 'package:hall_mate/widgets/filters_sheet.dart';
 
 // This is the "Search results" design. For now it is also shown in the
 // Search tab. Later it will open from the Home search bar.
@@ -123,8 +124,10 @@ class SearchScreen extends StatelessWidget {
                   Stack(
                     children: [
                       GestureDetector(
-                        // Later: open the filters bottom sheet
-                        onTap: () {},
+                        // Opens the Filters bottom sheet
+                        onTap: () {
+                          FiltersSheet.show(context);
+                        },
                         child: Container(
                           width: 50,
                           height: 50,

@@ -5,6 +5,7 @@ import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/profile_controller.dart';
 import 'package:hall_mate/controller/theme_controller.dart';
 import 'package:hall_mate/widgets/profile_row.dart';
+import 'package:hall_mate/view/favourite_screen.dart';
 
 // This is the "Profile & settings" tab.
 class ProfileScreen extends StatelessWidget {
@@ -171,6 +172,10 @@ class ProfileScreen extends StatelessWidget {
                         // API: number of favourite venues
                         subtitle: '${controller.savedVenuesCount} venues',
                         showDivider: false,
+                        // Opens the Saved venues screen
+                        onTap: () {
+                          Get.to(() => const FavouriteScreen());
+                        },
                       ),
                     ],
                   ),

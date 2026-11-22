@@ -5,6 +5,7 @@ import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/view/booking_detail_screen.dart';
 import 'package:hall_mate/widgets/photo_placeholder.dart';
 import 'package:hall_mate/widgets/status_chip.dart';
+import 'package:hall_mate/view/write_review_screen.dart';
 
 /// One booking in the "My bookings" list.
 ///
@@ -99,12 +100,17 @@ class BookingCard extends StatelessWidget {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  // Opens the Booking detail screen.
+                  // A completed booking opens the Write review screen,
+                  // every other booking opens the Booking detail screen.
                   // API: send this booking's id to the screen, for example
                   // Get.to(() => BookingDetailScreen(), arguments: bookingId)
                   // and load GET /bookings/{id} in BookingDetailController.
                   onPressed: () {
-                    Get.to(() => const BookingDetailScreen());
+                    if (status == 'Completed') {
+                      Get.to(() => const WriteReviewScreen());
+                    } else {
+                      Get.to(() => const BookingDetailScreen());
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:

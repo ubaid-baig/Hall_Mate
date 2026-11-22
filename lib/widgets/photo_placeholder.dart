@@ -11,7 +11,8 @@ class PhotoPlaceholder extends StatelessWidget {
   final double? width;
   final double height;
   final double iconSize;
-  final bool showLabel; // shows the text "Hall photo" under the icon
+  final bool showLabel; // shows a text under the icon
+  final String label; // the text under the icon (API: the photo's title)
   final BorderRadius borderRadius;
   final Widget? topRow; // optional row on top of the photo (tag + heart)
 
@@ -23,6 +24,7 @@ class PhotoPlaceholder extends StatelessWidget {
     this.width,
     this.iconSize = 26,
     this.showLabel = false,
+    this.label = 'Hall photo',
     this.topRow,
   });
 
@@ -47,7 +49,7 @@ class PhotoPlaceholder extends StatelessWidget {
         Icon(Icons.image_outlined, size: iconSize, color: inkColor),
         if (showLabel) ...[
           const SizedBox(height: 6),
-          Text('Hall photo', style: AppTextStyles.labelSmall(color: inkColor)),
+          Text(label, style: AppTextStyles.labelSmall(color: inkColor)),
         ],
       ],
     );

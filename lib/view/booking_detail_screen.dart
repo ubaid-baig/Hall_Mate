@@ -10,6 +10,8 @@ import 'package:hall_mate/widgets/info_tile.dart';
 import 'package:hall_mate/widgets/offer_bubble.dart';
 import 'package:hall_mate/widgets/photo_placeholder.dart';
 import 'package:hall_mate/widgets/status_chip.dart';
+import 'package:hall_mate/view/chat_room_screen.dart';
+import 'package:hall_mate/view/payment_screen.dart';
 
 // Booking detail & negotiation (customer view).
 // Opens when a button on a booking card in "My bookings" is tapped.
@@ -180,8 +182,10 @@ class BookingDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                                 GestureDetector(
-                                  // Later: open the chat with this manager
-                                  onTap: () {},
+                                  // Opens the Chat room with this manager
+                                  onTap: () {
+                                    Get.to(() => const ChatRoomScreen());
+                                  },
                                   child: Container(
                                     width: 40,
                                     height: 40,
@@ -349,8 +353,11 @@ class BookingDetailScreen extends StatelessWidget {
                                 bgColor: colors.primary,
                                 borderColor: colors.primary,
                                 textColor: colors.textOnPrimary,
-                                // Later: accept the offer (POST /bookings/{id}/accept)
-                                onTap: () {},
+                                // Later: accept the offer first (POST /bookings/{id}/accept)
+                                // and only then open the Payment screen.
+                                onTap: () {
+                                  Get.to(() => const PaymentScreen());
+                                },
                               ),
                             ),
                           ],
