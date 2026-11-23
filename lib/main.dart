@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hall_mate/app/app_theme.dart';
+import 'package:hall_mate/view/ballroom_details.dart';
+import 'package:hall_mate/view/booking_detail_screen.dart';
 import 'package:hall_mate/view/nav_bar_widget.dart';
 import 'package:hall_mate/view/forgot_password_screen.dart';
 import 'package:hall_mate/view/login_screen.dart';
+import 'package:hall_mate/view/outdoor_details.dart';
 import 'package:hall_mate/view/sign_up_screen.dart';
 import 'package:hall_mate/view/splash_screen.dart';
 import 'package:hall_mate/view/home_screen.dart';
@@ -48,7 +51,9 @@ class Main extends StatelessWidget {
       // home: NavBarWidget(),
       // home:const ManagerDashboardScreen() ,
       // home: const ManagerDashboardReviewScreen(),
-      home: const VenueDetailsScreen(),
+      home: const BallroomDetailsScreen(),
+      // home: const VenueDetailsScreen(),
+      // home: const OutdoorDetailsScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
