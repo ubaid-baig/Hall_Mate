@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/view/chat_room_screen.dart';
 
 /// One row in the Chat list.
 ///
@@ -45,82 +47,90 @@ class ConversationTile extends StatelessWidget {
       avatarInk = colors.textOnPrimary;
     }
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: avatarBg,
-                child: Text(
-                  initials,
-                  style: AppTextStyles.labelSmall(color: avatarInk),
+    return GestureDetector(
+      // Opens the Chat room.
+      // API: send this conversation's id along, for example
+      // Get.to(() => ChatRoomScreen(), arguments: conversationId)
+      onTap: () {
+        Get.to(() => const ChatRoomScreen());
+      },
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: avatarBg,
+                  child: Text(
+                    initials,
+                    style: AppTextStyles.labelSmall(color: avatarInk),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(name, style: AppTextStyles.titleMedium()),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          time,
-                          style: hasUnread
-                              ? AppTextStyles.labelSmall(color: colors.primaryInk)
-                              : AppTextStyles.caption(color: colors.textMuted),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: AppTextStyles.bodySmall(
-                              color: hasUnread
-                                  ? colors.textPrimary
-                                  : colors.textMuted,
-                            ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(name, style: AppTextStyles.titleMedium()),
                           ),
-                        ),
-                        if (hasUnread) ...[
                           const SizedBox(width: 8),
-                          Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: colors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '$unreadCount',
-                                style: AppTextStyles.labelTiny(
-                                  color: colors.textOnPrimary,
-                                ),
+                          Text(
+                            time,
+                            style: hasUnread
+                                ? AppTextStyles.labelSmall(color: colors.primaryInk)
+                                : AppTextStyles.caption(color: colors.textMuted),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              message,
+                              style: AppTextStyles.bodySmall(
+                                color: hasUnread
+                                    ? colors.textPrimary
+                                    : colors.textMuted,
                               ),
                             ),
                           ),
+                          if (hasUnread) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$unreadCount',
+                                  style: AppTextStyles.labelTiny(
+                                    color: colors.textOnPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        if (showDivider) Divider(color: colors.border, height: 1),
-      ],
+          if (showDivider) Divider(color: colors.border, height: 1),
+        ],
+      ),
     );
   }
 }

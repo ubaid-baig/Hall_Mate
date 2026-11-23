@@ -6,6 +6,8 @@ import 'package:hall_mate/controller/home_controller.dart';
 import 'package:hall_mate/widgets/venue_card.dart';
 import 'package:hall_mate/widgets/venue_row_card.dart';
 import 'package:hall_mate/widgets/venue_type_tile.dart';
+import 'package:hall_mate/view/notifications_screen.dart';
+import 'package:hall_mate/widgets/filters_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -63,8 +65,10 @@ class HomeScreen extends StatelessWidget {
                     Stack(
                       children: [
                         GestureDetector(
-                          // Later: open the Notifications screen
-                          onTap: () {},
+                          // Opens the Notifications screen
+                          onTap: () {
+                            Get.to(() => const NotificationsScreen());
+                          },
                           child: Container(
                             width: 44,
                             height: 44,
@@ -153,8 +157,10 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
-                      // Later: open the filters bottom sheet
-                      onTap: () {},
+                      // Opens the Filters bottom sheet
+                      onTap: () {
+                        FiltersSheet.show(context);
+                      },
                       child: Container(
                         width: 50,
                         height: 50,

@@ -40,11 +40,11 @@ class HomeController extends GetxController {
       'photo': 'emerald',
     },
     {
-      // GUESS: rating, guests and price were cut off in the Figma design.
+      // Rating, guests and price confirmed by the Saved venues design.
       'name': 'Noor Ballroom',
       'rating': '4.7',
-      'subtitle': 'Clifton · up to 700 guests',
-      'price': 'Rs 3,500',
+      'subtitle': 'Clifton · up to 350 guests',
+      'price': 'Rs 3,100',
       'tag': 'Ballroom',
       'isFavorite': false,
       'photo': 'marigold',
