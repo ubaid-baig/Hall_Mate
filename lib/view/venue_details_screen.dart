@@ -1,193 +1,656 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import '../controller/venue_details_controller.dart';
+import 'package:hall_mate/controller/venue_detail_controller.dart';
+import 'package:hall_mate/view/booking_request_screen.dart';
+import 'package:hall_mate/widgets/action_button.dart';
+import 'package:hall_mate/widgets/date_chip.dart';
+import 'package:hall_mate/widgets/feature_tile.dart';
+import 'package:hall_mate/widgets/package_card.dart';
+import 'package:hall_mate/widgets/review_card.dart';
+import 'package:hall_mate/view/media_gallery_screen.dart';
 
-// Amber colour for the "Banquet only" badge.
-// If your AppColors already has a warning colour, replace this with it.
-const Color _amber = Color(0xFFE0A24A);
-
-class VenueDetailsScreen extends StatelessWidget {
-  const VenueDetailsScreen({super.key});
+// Venue detail. Opens when a venue card is tapped (Home or Search results).
+class VenueDetailScreen extends StatelessWidget {
+  const VenueDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
-    final VenueDetailsController c = Get.put(VenueDetailsController());
+    final VenueDetailController controller = Get.put(VenueDetailController());
+
+    // Width of one day in the "Free dates" row, so 7 days fit the screen.
+    final double dateWidth = (sw * 0.9 - 36) / 7;
 
     return Scaffold(
-      backgroundColor: colors.bgSurface,
+      // The cover colour is the screen colour. It fills the status bar area
+      // and shows behind the rounded top corners of the white sheet.
+      // API: when the real cover photo is added, only the cover box changes.
+      backgroundColor: colors.photoEmerald,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
-            const _TopBar(),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: sh * 0.02),
-                    const _StepProgress(),
-                    SizedBox(height: sh * 0.02),
+                    // ════════ COVER PHOTO ════════
+                    Container(
+                      width: double.infinity,
+                      height: sh * 0.32,
+                      color: colors.photoEmerald,
+                      padding: EdgeInsets.fromLTRB(
+                        sw * 0.045,
+                        sh * 0.018,
+                        sw * 0.045,
+                        sh * 0.025,
+                      ),
+                      child: Column(
+                        children: [
+                          // Top row: back (left), share and heart (right)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: colors.bgSurface,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_back,
+                                    size: 22,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    // Later: share the venue link
+                                    onTap: () {},
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: colors.bgSurface,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.share_outlined,
+                                        size: 20,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  GestureDetector(
+                                    // Later: add or remove this venue from favourites
+                                    onTap: () {},
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: colors.bgSurface,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        controller.isFavorite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        size: 22,
+                                        color: controller.isFavorite
+                                            ? colors.iconHeart
+                                            : colors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
 
-                    // ---------- Basic info ----------
-                    _Card(
+                          // Middle: the photo placeholder (icon + text)
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.image_outlined,
+                                    size: 36,
+                                    color: colors.photoEmeraldInk,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    controller.coverLabel,
+                                    style: AppTextStyles.labelSmall(
+                                      color: colors.photoEmeraldInk,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Bottom row: photo counter (left), video button (right)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                // Opens the Media gallery screen
+                                onTap: () {
+                                  Get.to(() => const MediaGalleryScreen());
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    controller.photoCountText,
+                                    style: AppTextStyles.labelSmall(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                // Opens the Media gallery screen (Later: on the Videos tab)
+                                onTap: () {
+                                  Get.to(() => const MediaGalleryScreen());
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.bgSurface,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          color: colors.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.play_arrow_rounded,
+                                          size: 16,
+                                          color: colors.textOnPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        controller.videoText,
+                                        style: AppTextStyles.labelSmall(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ════════ WHITE SHEET ════════
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.only(
+                        left: sw * 0.05,
+                        right: sw * 0.05,
+                        top: 20,
+                        bottom: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.bgSurface,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Basic info', style: _cardTitle()),
-                          SizedBox(height: sh * 0.015),
-
-                          _Label('Venue name'),
-                          _Field(
-                            controller: c.nameController,
-                            icon: Icons.store_mall_directory_outlined,
-                            hint: 'Venue name',
+                          // ── Type chip and Verified chip ──
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.primarySoft,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Text(
+                                  controller.type,
+                                  style: AppTextStyles.labelSmall(
+                                    color: colors.primaryInk,
+                                  ),
+                                ),
+                              ),
+                              // API: show this chip only if the venue is verified
+                              if (controller.isVerified) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.accentSoft,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.verified_user_outlined,
+                                        size: 16,
+                                        color: colors.accentStrongInk,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        controller.verifiedText,
+                                        style: AppTextStyles.labelSmall(
+                                          color: colors.accentStrongInk,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                          SizedBox(height: sh * 0.018),
+                          const SizedBox(height: 12),
 
-                          _Label('Area'),
-                          _Field(
-                            controller: c.areaController,
-                            icon: Icons.location_on_outlined,
-                            hint: 'Area',
+                          // ── Name, location, rating ──
+                          Text(controller.name, style: AppTextStyles.h1()),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 18,
+                                color: colors.textMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                controller.location,
+                                style: AppTextStyles.bodyMedium(
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Icon(
+                                Icons.star_rounded,
+                                size: 18,
+                                color: colors.iconStar,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                controller.rating,
+                                style: AppTextStyles.titleSmall(),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                controller.reviewsText,
+                                style: AppTextStyles.bodySmall(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: sh * 0.018),
+                          SizedBox(height: sh * 0.022),
 
-                          _Label('Full address'),
-                          _Field(
-                            controller: c.addressController,
-                            icon: Icons.map_outlined,
-                            hint: 'Street, block and landmark',
-                          ),
-                          SizedBox(height: sh * 0.018),
-
+                          // ── 3 feature tiles ──
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _Label('Max guests'),
-                                    _Field(
-                                      controller: c.maxGuestsController,
-                                      icon: Icons.people_outline,
-                                      hint: '0',
-                                      isNumber: true,
-                                    ),
-                                  ],
+                                child: FeatureTile(
+                                  iconType: controller.features[0]['icon']!,
+                                  label: controller.features[0]['label']!,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FeatureTile(
+                                  iconType: controller.features[1]['icon']!,
+                                  label: controller.features[1]['label']!,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FeatureTile(
+                                  iconType: controller.features[2]['icon']!,
+                                  label: controller.features[2]['label']!,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: sh * 0.028),
+
+                          // ── About ──
+                          Text('About', style: AppTextStyles.h3()),
+                          const SizedBox(height: 8),
+                          Text(
+                            controller.about,
+                            style: AppTextStyles.bodyMedium(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: sh * 0.028),
+
+                          // ── Packages ──
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Packages', style: AppTextStyles.h3()),
+                              Text(
+                                controller.minGuestsText,
+                                style: AppTextStyles.caption(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: PackageCard(
+                                  name: controller.packages[0]['name'],
+                                  price: controller.packages[0]['price'],
+                                  features: controller.packages[0]['features'],
+                                  isPopular: controller.packages[0]['isPopular'],
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: PackageCard(
+                                  name: controller.packages[1]['name'],
+                                  price: controller.packages[1]['price'],
+                                  features: controller.packages[1]['features'],
+                                  isPopular: controller.packages[1]['isPopular'],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: sh * 0.028),
+
+                          // ── Free dates ──
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                controller.freeDatesTitle,
+                                style: AppTextStyles.h3(),
+                              ),
+                              TextButton(
+                                // Later: open the full calendar
+                                onPressed: () {},
+                                child: Text(
+                                  'Full calendar',
+                                  style: AppTextStyles.titleSmall(
+                                    color: colors.primaryInk,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 72,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              // API: one chip for every day in the list
+                              itemCount: controller.dates.length,
+                              itemBuilder: (context, index) {
+                                final day = controller.dates[index];
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: GestureDetector(
+                                    // Later: select this day (RxInt in the controller)
+                                    onTap: () {},
+                                    child: SizedBox(
+                                      width: dateWidth,
+                                      child: DateChip(
+                                        day: day['day'],
+                                        date: day['date'],
+                                        isLunchFree: day['isLunchFree'],
+                                        isDinnerFree: day['isDinnerFree'],
+                                        isSelected:
+                                            controller.selectedDateIndex == index,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // The grey box about the selected day
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.bgSubtle,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    style: AppTextStyles.titleSmall(
+                                      color: colors.textPrimary,
+                                    ),
+                                    children: [
+                                      TextSpan(text: controller.selectedDateText),
+                                      TextSpan(
+                                        text: controller.selectedDateNote,
+                                        style: AppTextStyles.bodySmall(
+                                          color: colors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
                                   children: [
-                                    _Label('Min guests'),
-                                    _Field(
-                                      controller: c.minGuestsController,
-                                      icon: Icons.people_outline,
-                                      hint: '0',
-                                      isNumber: true,
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: colors.success,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      controller.selectedDateStatus,
+                                      style: AppTextStyles.titleSmall(
+                                        color: colors.primaryInk,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Legend: what the bars mean
+                          Row(
+                            children: [
+                              Container(
+                                width: 14,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: colors.success,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Free (lunch | dinner)',
+                                style: AppTextStyles.caption(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Container(
+                                width: 14,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: colors.borderStrong,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Booked',
+                                style: AppTextStyles.caption(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: sh * 0.022),
+
+                          // ── Reviews ──
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Reviews', style: AppTextStyles.h3()),
+                              TextButton(
+                                // Later: open the full reviews list
+                                onPressed: () {},
+                                child: Text(
+                                  controller.seeAllReviewsText,
+                                  style: AppTextStyles.titleSmall(
+                                    color: colors.primaryInk,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Column(
+                            // API: one card for every review in the list
+                            children: controller.reviews.map((review) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ReviewCard(
+                                  initials: review['initials'],
+                                  name: review['name'],
+                                  subtitle: review['subtitle'],
+                                  rating: review['rating'],
+                                  text: review['text'],
+                                  managerReply: review['managerReply'],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ════════ BOTTOM BAR (stays in place, does not scroll) ════════
+            Container(
+              color: colors.bgSurface,
+              // This SafeArea keeps the bar above the phone's bottom edge
+              // and the white colour fills that edge too.
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    Divider(color: colors.border, height: 1),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: sw * 0.05,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'From',
+                                style: AppTextStyles.caption(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  style: AppTextStyles.h2(
+                                    color: colors.textPrimary,
+                                  ),
+                                  children: [
+                                    // API: the lowest package price
+                                    TextSpan(text: controller.fromPrice),
+                                    TextSpan(
+                                      text: ' / head',
+                                      style: AppTextStyles.bodySmall(
+                                        color: colors.textMuted,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: sh * 0.018),
-
-                    // ---------- Venue type ----------
-                    const _VenueTypeCard(),
-                    SizedBox(height: sh * 0.018),
-
-                    // ---------- Banquet details ----------
-                    _Card(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Banquet details', style: _cardTitle()),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _amber.withOpacity(0.18),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  'Banquet only',
-                                  style: AppTextStyles.bodySmall(color: _amber),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          _SwitchRow(
-                            title: 'In-house catering',
-                            subtitle: 'Menus come from your packages',
-                            value: c.inHouseCatering,
-                          ),
-                          const _RowDivider(),
-                          _SwitchRow(
-                            title: 'Separate family hall',
-                            subtitle: 'Ladies and families can sit apart',
-                            value: c.separateFamilyHall,
-                          ),
-                          const _RowDivider(),
-                          _SwitchRow(
-                            title: 'On-site parking',
-                            subtitle: 'Shown as a facility to customers',
-                            value: c.onSiteParking,
-                          ),
-                          const _RowDivider(),
-                          const _PackagesRow(),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: sh * 0.018),
-
-                    // ---------- About ----------
-                    _Card(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('About your venue', style: _cardTitle()),
-                          SizedBox(height: sh * 0.012),
-                          TextField(
-                            controller: c.aboutController,
-                            maxLines: 5,
-                            maxLength: VenueDetailsController.aboutMaxLength,
-                            style: AppTextStyles.bodyLarge(),
-                            decoration: _decoration(
-                              colors,
-                              hint: 'Describe your venue',
-                            ).copyWith(counterText: ''),
-                          ),
-                          const SizedBox(height: 8),
-                          Obx(
-                            () => Text(
-                              '${c.aboutLength.value} / '
-                              '${VenueDetailsController.aboutMaxLength}',
-                              style: AppTextStyles.bodySmall(
-                                  color: colors.textMuted),
+                          SizedBox(
+                            width: sw * 0.46,
+                            child: ActionButton(
+                              label: 'Request booking',
+                              height: 52,
+                              bgColor: colors.primary,
+                              borderColor: colors.primary,
+                              textColor: colors.textOnPrimary,
+                              // Opens the Booking request screen.
+                              // API: send the venue id along, for example
+                              // Get.to(() => BookingRequestScreen(), arguments: venueId)
+                              onTap: () {
+                                Get.to(() => const BookingRequestScreen());
+                              },
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: sh * 0.03),
                   ],
                 ),
               ),
@@ -195,386 +658,6 @@ class VenueDetailsScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      // ---------- Bottom buttons ----------
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(sw * 0.05, 12, sw * 0.05, 12),
-        decoration: BoxDecoration(
-          color: colors.bgScreen,
-          border: Border(top: BorderSide(color: colors.borderStrong)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: (sh * 0.065).clamp(48.0, 58.0),
-                  child: OutlinedButton(
-                    onPressed: c.saveDraft,
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: colors.borderStrong),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text('Save draft', style: AppTextStyles.labelButton()),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  height: (sh * 0.065).clamp(48.0, 58.0),
-                  child: ElevatedButton(
-                    onPressed: c.saveAndContinue,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primary,
-                      foregroundColor: colors.textOnPrimary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Save & continue',
-                      style:
-                          AppTextStyles.labelButton(color: colors.textOnPrimary),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
-  }
-}
-
-TextStyle _cardTitle() => AppTextStyles.titleSmall()
-    .copyWith(fontSize: 17, fontWeight: FontWeight.w800);
-
-/// One shared look for every text box on this screen.
-InputDecoration _decoration(
-  AppColors colors, {
-  required String hint,
-  IconData? icon,
-}) {
-  return InputDecoration(
-    filled: true,
-    fillColor: colors.bgSurface,
-    prefixIcon:
-        icon == null ? null : Icon(icon, size: 20, color: colors.textMuted),
-    hintText: hint,
-    hintStyle: AppTextStyles.bodyLarge(color: colors.textMuted),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colors.borderStrong),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: colors.primaryBorder),
-    ),
-  );
-}
-
-// =====================================================================
-// Top bar: back arrow + title + "Step 1 of 3"
-// =====================================================================
-
-class _TopBar extends StatelessWidget {
-  const _TopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Container(
-      width: double.infinity,
-      color: colors.bgScreen,
-      padding: const EdgeInsets.fromLTRB(8, 10, 16, 12),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Venue details',
-                    style: AppTextStyles.titleSmall().copyWith(fontSize: 18)),
-                const SizedBox(height: 2),
-                Text('Step 1 of 3 · Banquet form',
-                    style:
-                        AppTextStyles.bodySmall(color: colors.textSecondary)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// =====================================================================
-// Step progress: Details / Photos / Packages
-// =====================================================================
-
-class _StepProgress extends StatelessWidget {
-  const _StepProgress();
-
-  @override
-  Widget build(BuildContext context) {
-    const steps = ['Details', 'Photos', 'Packages'];
-    const current = 0; // 0 = first step
-
-    return Row(
-      children: [
-        for (int i = 0; i < steps.length; i++) ...[
-          Expanded(child: _StepItem(label: steps[i], active: i == current)),
-          if (i != steps.length - 1) const SizedBox(width: 8),
-        ],
-      ],
-    );
-  }
-}
-
-class _StepItem extends StatelessWidget {
-  const _StepItem({required this.label, required this.active});
-
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 3,
-          decoration: BoxDecoration(
-            color: active ? colors.primaryInk : colors.borderStrong,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: AppTextStyles.bodySmall(
-            color: active ? colors.primaryInk : colors.textSecondary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// =====================================================================
-// Small reusable pieces
-// =====================================================================
-
-/// A rounded box with a border. Every section sits inside one.
-class _Card extends StatelessWidget {
-  const _Card({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.bgScreen,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colors.borderStrong),
-      ),
-      child: child,
-    );
-  }
-}
-
-/// The small title above a text box.
-class _Label extends StatelessWidget {
-  const _Label(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: AppTextStyles.titleSmall()),
-    );
-  }
-}
-
-/// A text box with an icon on the left.
-class _Field extends StatelessWidget {
-  const _Field({
-    required this.controller,
-    required this.icon,
-    required this.hint,
-    this.isNumber = false,
-  });
-
-  final TextEditingController controller;
-  final IconData icon;
-  final String hint;
-  final bool isNumber;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return TextField(
-      controller: controller,
-      style: AppTextStyles.bodyLarge(),
-      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      inputFormatters:
-          isNumber ? [FilteringTextInputFormatter.digitsOnly] : null,
-      decoration: _decoration(colors, hint: hint, icon: icon),
-    );
-  }
-}
-
-class _VenueTypeCard extends StatelessWidget {
-  const _VenueTypeCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return _Card(
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.restaurant, size: 20, color: colors.primaryInk),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Banquet', style: AppTextStyles.titleSmall()),
-                const SizedBox(height: 2),
-                Text(
-                  'Set when you signed up. Contact support to change it.',
-                  style: AppTextStyles.bodySmall(color: colors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A row with a title, a small description and an on/off switch.
-class _SwitchRow extends StatelessWidget {
-  const _SwitchRow({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-  });
-
-  final String title;
-  final String subtitle;
-  final RxBool value; // watched with Obx, so the switch updates itself
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.titleSmall()),
-                const SizedBox(height: 2),
-                Text(subtitle,
-                    style:
-                        AppTextStyles.bodySmall(color: colors.textSecondary)),
-              ],
-            ),
-          ),
-          Obx(
-            () => Switch(
-              value: value.value,
-              onChanged: (v) => value.value = v,
-              activeColor: Colors.white,
-              activeTrackColor: colors.primary,
-              inactiveTrackColor: colors.borderStrong,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PackagesRow extends StatelessWidget {
-  const _PackagesRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Per-head menu packages',
-                    style: AppTextStyles.titleSmall()),
-                const SizedBox(height: 2),
-                Text('Silver Rs 2,200 · Gold Rs 2,800',
-                    style:
-                        AppTextStyles.bodySmall(color: colors.textSecondary)),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              // Get.to(PackagesScreen());
-            },
-            child: Text('Edit →',
-                style: AppTextStyles.titleSmall(color: colors.primaryInk)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RowDivider extends StatelessWidget {
-  const _RowDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Divider(height: 1, color: AppColors.of(context).borderStrong);
   }
 }

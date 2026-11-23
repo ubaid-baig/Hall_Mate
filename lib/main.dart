@@ -11,7 +11,7 @@ import 'package:hall_mate/view/splash_screen.dart';
 import 'package:hall_mate/view/home_screen.dart';
 import 'package:hall_mate/view/manager_dashboard.dart';
 import 'package:hall_mate/view/manager_dashboard_under_review.dart';
-import 'package:hall_mate/view/venue_details_screen.dart';
+import 'package:hall_mate/view/banquet_detail_screen.dart';
 import 'package:get/get.dart';
 
 

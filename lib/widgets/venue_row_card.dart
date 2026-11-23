@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import 'package:hall_mate/view/venue_detail_screen.dart';
+import 'package:hall_mate/view/venue_details_screen.dart';
 import 'package:hall_mate/widgets/photo_placeholder.dart';
 
 /// The small venue card: square photo on the left, details on the right.
