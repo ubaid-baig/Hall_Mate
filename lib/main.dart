@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hall_mate/app/app_theme.dart';
-import 'package:hall_mate/view/ballroom_details.dart';
-import 'package:hall_mate/view/booking_detail_screen.dart';
-import 'package:hall_mate/view/nav_bar_widget.dart';
-import 'package:hall_mate/view/forgot_password_screen.dart';
-import 'package:hall_mate/view/login_screen.dart';
-import 'package:hall_mate/view/outdoor_details.dart';
-import 'package:hall_mate/view/sign_up_screen.dart';
-import 'package:hall_mate/view/splash_screen.dart';
-import 'package:hall_mate/view/home_screen.dart';
-import 'package:hall_mate/view/manager_dashboard.dart';
-import 'package:hall_mate/view/manager_dashboard_under_review.dart';
-import 'package:hall_mate/view/banquet_detail_screen.dart';
+import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
+import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
+import 'package:hall_mate/view/user/nav_bar_widget.dart';
+import 'package:hall_mate/view/auth/forgot_password_screen.dart';
+import 'package:hall_mate/view/auth/login_screen.dart';
+import 'package:hall_mate/view/manager/venue_setup/outdoor_details.dart';
+import 'package:hall_mate/view/auth/sign_up_screen.dart';
+import 'package:hall_mate/view/auth/splash_screen.dart';
+import 'package:hall_mate/view/user/home/home_screen.dart';
+import 'package:hall_mate/view/manager/dashboard/manager_dashboard.dart';
+import 'package:hall_mate/view/manager/dashboard/manager_dashboard_under_review.dart';
+import 'package:hall_mate/view/manager/venue_setup/banquet_detail_screen.dart';
 import 'package:get/get.dart';
 
 
-import 'controller/auth_controller.dart';
-import 'controller/nav_controller.dart';
-import 'controller/theme_controller.dart';
+import 'controller/shared/auth_controller.dart';
+import 'controller/shared/nav_controller.dart';
+import 'controller/shared/theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,6 @@ Future<void> main() async {
   Get.put(NavController());
   final ThemeController themeController = Get.put(ThemeController());
 
-  // Read the saved theme BEFORE the app opens, so there is no light/dark flash.
   await themeController.loadSavedTheme();
 
   runApp(Main());
