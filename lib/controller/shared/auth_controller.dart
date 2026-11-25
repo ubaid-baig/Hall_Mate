@@ -1,6 +1,18 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/view/auth/login_screen.dart';
 
 class AuthController extends GetxController {
+
+
+  @override
+  void onReady() {
+    splashLoader();
+    // TODO: implement onReady
+    super.onReady();
+  }
+
+  RxBool isCheck = false.obs;
+
   RxBool isObscure = true.obs;
 
   // Sign up screen: true = "Venue manager" card is selected,
@@ -27,4 +39,14 @@ class AuthController extends GetxController {
   void selectVenueType(String type) {
     selectedVenueType.value = type;
   }
+
+  void rememberMe(){
+    isCheck.value = !isCheck.value;
+  }
+
+  Future<void> splashLoader() async {
+    await Future.delayed(Duration(seconds: 3));
+    Get.offAll(LoginScreen());
+  }
+
 }

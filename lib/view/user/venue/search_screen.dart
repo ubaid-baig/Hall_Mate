@@ -5,9 +5,10 @@ import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/user/venue/venue_search_controller.dart';
 import 'package:hall_mate/widgets/user/venue/venue_card.dart';
 import 'package:hall_mate/widgets/user/venue/filters_sheet.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 
-// This is the "Search results" design. For now it is also shown in the
-// Search tab. Later it will open from the Home search bar.
+// The Search tab. Opens from the bottom bar, and from the Home
+// search field and "See all".
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
@@ -17,6 +18,8 @@ class SearchScreen extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
     final VenueSearchController controller = Get.put(VenueSearchController());
+    // The saved venues (hearts). Created once in main.dart.
+    final FavouriteController favController = Get.find<FavouriteController>();
 
     return Scaffold(
       backgroundColor: colors.bgScreen,
@@ -34,9 +37,10 @@ class SearchScreen extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    // Later: Get.back() once this screen opens from Home.
-                    // (Inside the tab there is nothing to go back to.)
-                    onTap: () {},
+                    // Search is a tab, so back goes to the Home tab
+                    onTap: () {
+                      controller.goToHomeTab();
+                    },
                     child: Icon(
                       Icons.arrow_back,
                       size: 24,
@@ -51,10 +55,14 @@ class SearchScreen extends StatelessWidget {
                         // API: the venue type that was searched
                         Text(controller.title, style: AppTextStyles.h3()),
                         const SizedBox(height: 2),
-                        // API: number of results
-                        Text(
-                          controller.resultText,
-                          style: AppTextStyles.caption(color: colors.textMuted),
+                        // Obx: the number changes while you type
+                        Obx(
+                          () => Text(
+                            controller.resultText(),
+                            style: AppTextStyles.caption(
+                              color: colors.textMuted,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -89,6 +97,11 @@ class SearchScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: TextField(
+                      // Every letter typed is sent to the controller,
+                      // and the list below updates straight away.
+                      onChanged: (text) {
+                        controller.updateSearch(text);
+                      },
                       textInputAction: TextInputAction.search,
                       style: AppTextStyles.bodyLarge(),
                       decoration: InputDecoration(
@@ -121,7 +134,9 @@ class SearchScreen extends StatelessWidget {
 
                   // Stack: the filter button is the base, Positioned puts the
                   // orange number badge on its top right corner.
-                  Stack(
+                  // Obx: the number goes down when a chip's x is tapped.
+                  Obx(
+                    () => Stack(
                     children: [
                       GestureDetector(
                         // Opens the Filters bottom sheet
@@ -142,6 +157,8 @@ class SearchScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // No badge when there are no filters
+                      if (controller.filterChips.isNotEmpty)
                       Positioned(
                         top: 4,
                         right: 4,
@@ -154,8 +171,8 @@ class SearchScreen extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              // API: number of active filters
-                              '${controller.filterCount}',
+                              // How many filter chips there are
+                              '${controller.filterChips.length}',
                               style: AppTextStyles.labelTiny(
                                 color: colors.textOnAccent,
                               ),
@@ -165,13 +182,19 @@ class SearchScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  ),
                 ],
               ),
             ),
             SizedBox(height: sh * 0.015),
 
             // ── Active filter chips (scroll sideways) ──
-            SizedBox(
+            // Obx: a chip disappears when its x is tapped.
+            // (itemCount reads filterChips here, inside the Obx.)
+            Obx(
+              () => controller.filterChips.isEmpty
+                  ? const SizedBox()
+                  : SizedBox(
               height: 38,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -199,14 +222,24 @@ class SearchScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          // Later: tap the x to remove this filter
-                          Icon(Icons.close, size: 16, color: colors.primaryInk),
+                          // Tap the x to remove this filter
+                          GestureDetector(
+                            onTap: () {
+                              controller.removeChip(index);
+                            },
+                            child: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: colors.primaryInk,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   );
                 },
               ),
+            ),
             ),
             SizedBox(height: sh * 0.008),
 
@@ -246,10 +279,24 @@ class SearchScreen extends StatelessWidget {
 
             // ── Venue list (this part scrolls up and down) ──
             Expanded(
-              child: SingleChildScrollView(
+              // Obx: the list changes while you type, and when a heart is tapped
+              child: Obx(() {
+                final List<Map<String, dynamic>> venues = controller.results();
+
+                if (venues.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
+                    child: Text(
+                      controller.emptyText(),
+                      style: AppTextStyles.bodyMedium(color: colors.textMuted),
+                    ),
+                  );
+                }
+
+                return SingleChildScrollView(
                 child: Column(
                   // API: one card for every venue in the search results
-                  children: controller.venues.map((venue) {
+                  children: venues.map((venue) {
                     return Padding(
                       padding: EdgeInsets.only(
                         left: sw * 0.05,
@@ -262,13 +309,19 @@ class SearchScreen extends StatelessWidget {
                         subtitle: venue['subtitle'],
                         price: venue['price'],
                         tag: venue['tag'],
-                        isFavorite: venue['isFavorite'],
+                        // Red heart if this venue is saved
+                        isFavorite: favController.isSaved(venue['name']),
                         photoStyle: venue['photo'],
+                        // Tap the heart: save or unsave this venue
+                        onFavoriteTap: () {
+                          favController.toggleFavourite(venue);
+                        },
                       ),
                     );
                   }).toList(),
                 ),
-              ),
+                );
+              }),
             ),
           ],
         ),

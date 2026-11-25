@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/widgets/user/venue/venue_card.dart';
-import '../../../controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 
 // Saved venues. Opens from Profile > Account > Saved venues.
 class FavouriteScreen extends StatelessWidget {
@@ -14,7 +14,8 @@ class FavouriteScreen extends StatelessWidget {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
-    final FavouriteController controller = Get.put(FavouriteController());
+    // Created once in main.dart, so we only find it here.
+    final FavouriteController controller = Get.find<FavouriteController>();
 
     return Scaffold(
       // White, so the status bar area matches the white top bar.
@@ -46,10 +47,12 @@ class FavouriteScreen extends StatelessWidget {
                     children: [
                       Text('Saved venues', style: AppTextStyles.h3()),
                       const SizedBox(height: 2),
-                      // API: how many venues are saved
-                      Text(
-                        controller.countText,
-                        style: AppTextStyles.caption(color: colors.textMuted),
+                      // Obx: the count changes when a heart is tapped
+                      Obx(
+                        () => Text(
+                          controller.countText(),
+                          style: AppTextStyles.caption(color: colors.textMuted),
+                        ),
                       ),
                     ],
                   ),
@@ -69,14 +72,19 @@ class FavouriteScreen extends StatelessWidget {
                     SizedBox(height: sh * 0.015),
 
                     // ── Venue type chips (scroll sideways) ──
-                    SizedBox(
+                    // Obx: the green chip moves when another chip is tapped.
+                    // The value is read here first, because ListView builds
+                    // the chips a moment later, outside the Obx.
+                    Obx(() {
+                    final int selected = controller.selectedFilterIndex.value;
+
+                    return SizedBox(
                       height: 40,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: controller.filters.length,
                         itemBuilder: (context, index) {
-                          final bool isSelected =
-                              controller.selectedFilterIndex == index;
+                          final bool isSelected = selected == index;
 
                           return Padding(
                             padding: EdgeInsets.only(
@@ -84,9 +92,9 @@ class FavouriteScreen extends StatelessWidget {
                               right: 8,
                             ),
                             child: GestureDetector(
-                              // Later: set the selected chip in the controller
-                              // and show only the venues of that type.
-                              onTap: () {},
+                              onTap: () {
+                                controller.selectFilter(index);
+                              },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 18,
@@ -117,15 +125,35 @@ class FavouriteScreen extends StatelessWidget {
                           );
                         },
                       ),
-                    ),
+                    );
+                    }),
                     SizedBox(height: sh * 0.015),
 
                     // ── Saved venues (this part scrolls up and down) ──
                     Expanded(
-                      child: SingleChildScrollView(
+                      // Obx: the list changes when a chip or a heart is tapped
+                      child: Obx(() {
+                        final List<Map<String, dynamic>> venues =
+                            controller.filteredVenues();
+
+                        if (venues.isEmpty) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: sw * 0.05,
+                            ),
+                            child: Text(
+                              controller.emptyText(),
+                              style: AppTextStyles.bodyMedium(
+                                color: colors.textMuted,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return SingleChildScrollView(
                         child: Column(
                           // API: one card for every saved venue
-                          children: controller.venues.map((venue) {
+                          children: venues.map((venue) {
                             return Padding(
                               padding: EdgeInsets.only(
                                 left: sw * 0.05,
@@ -137,14 +165,20 @@ class FavouriteScreen extends StatelessWidget {
                                 rating: venue['rating'],
                                 subtitle: venue['subtitle'],
                                 price: venue['price'],
-                                tag: venue['tag'],
-                                isFavorite: venue['isFavorite'],
+                                tag: venue['type'],
+                                // Everything on this screen is saved
+                                isFavorite: true,
                                 photoStyle: venue['photo'],
+                                // Tap the heart: unsave, the card disappears
+                                onFavoriteTap: () {
+                                  controller.toggleFavourite(venue);
+                                },
                               ),
                             );
                           }).toList(),
                         ),
-                      ),
+                        );
+                      }),
                     ),
                   ],
                 ),

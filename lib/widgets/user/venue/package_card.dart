@@ -3,14 +3,16 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
 /// One package (Silver, Gold ...) on the Venue detail screen.
-/// A popular package gets a green look and a "Popular" pill.
+/// The SELECTED package gets the green look.
+/// The POPULAR package gets the orange "Popular" pill.
 ///
 /// API: every value comes from one package in the venue's packages list.
 class PackageCard extends StatelessWidget {
   final String name; // API: package name
   final String price; // API: price per head, e.g. 'Rs 2,200'
   final List<String> features; // API: what the package includes
-  final bool isPopular; // API: true for the package to highlight
+  final bool isPopular; // API: true shows the "Popular" pill
+  final bool isSelected; // true for the package the user tapped (green look)
 
   const PackageCard({
     super.key,
@@ -18,6 +20,7 @@ class PackageCard extends StatelessWidget {
     required this.price,
     required this.features,
     required this.isPopular,
+    this.isSelected = false,
   });
 
   @override
@@ -27,10 +30,10 @@ class PackageCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isPopular ? colors.primaryTint : colors.bgSurface,
+        color: isSelected ? colors.primaryTint : colors.bgSurface,
         border: Border.all(
-          color: isPopular ? colors.primaryBorder : colors.border,
-          width: isPopular ? 2 : 1,
+          color: isSelected ? colors.primaryBorder : colors.border,
+          width: isSelected ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(16),
       ),

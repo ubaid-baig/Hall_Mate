@@ -6,6 +6,7 @@ import 'package:hall_mate/controller/user/profile/profile_controller.dart';
 import 'package:hall_mate/controller/shared/theme_controller.dart';
 import 'package:hall_mate/widgets/user/profile/profile_row.dart';
 import 'package:hall_mate/view/user/venue/favourite_screen.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 
 // This is the "Profile & settings" tab.
 class ProfileScreen extends StatelessWidget {
@@ -19,6 +20,8 @@ class ProfileScreen extends StatelessWidget {
     final ProfileController controller = Get.put(ProfileController());
     // Already created in main.dart
     final ThemeController themeController = Get.find<ThemeController>();
+    // The saved venues. Created once in main.dart.
+    final FavouriteController favController = Get.find<FavouriteController>();
 
     return Scaffold(
       backgroundColor: colors.bgScreen,
@@ -166,16 +169,18 @@ class ProfileScreen extends StatelessWidget {
                         // API: the saved card
                         subtitle: 'Card ending ${controller.cardEnding}',
                       ),
-                      ProfileRow(
-                        icon: Icons.favorite_border_rounded,
-                        title: 'Saved venues',
-                        // API: number of favourite venues
-                        subtitle: '${controller.savedVenuesCount} venues',
-                        showDivider: false,
-                        // Opens the Saved venues screen
-                        onTap: () {
-                          Get.to(() => const FavouriteScreen());
-                        },
+                      // Obx: the number changes when a heart is tapped anywhere
+                      Obx(
+                        () => ProfileRow(
+                          icon: Icons.favorite_border_rounded,
+                          title: 'Saved venues',
+                          subtitle: favController.countText(),
+                          showDivider: false,
+                          // Opens the Saved venues screen
+                          onTap: () {
+                            Get.to(() => const FavouriteScreen());
+                          },
+                        ),
                       ),
                     ],
                   ),

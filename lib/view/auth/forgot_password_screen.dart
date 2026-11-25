@@ -29,7 +29,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () {Get.off(LoginScreen());},
+                    onTap: () {Get.back();},
                     child: Icon(
                       Icons.arrow_back,
                       size: 24,
