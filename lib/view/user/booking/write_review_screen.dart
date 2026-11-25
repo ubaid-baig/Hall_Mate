@@ -119,19 +119,28 @@ class WriteReviewScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
+                        // Tap a star to change the rating.
+                        // Obx: the stars and the word change straight away.
                         Center(
-                          child: StarRow(
-                            rating: controller.overallRating,
-                            size: 40,
-                            gap: 8,
+                          child: Obx(
+                            () => StarRow(
+                              rating: controller.overallRating.value,
+                              size: 40,
+                              gap: 8,
+                              onStarTap: (stars) {
+                                controller.setOverallRating(stars);
+                              },
+                            ),
                           ),
                         ),
                         const SizedBox(height: 10),
                         Center(
-                          child: Text(
-                            controller.ratingLabel,
-                            style: AppTextStyles.titleMedium(
-                              color: colors.primaryInk,
+                          child: Obx(
+                            () => Text(
+                              controller.ratingLabel(),
+                              style: AppTextStyles.titleMedium(
+                                color: colors.primaryInk,
+                              ),
                             ),
                           ),
                         ),
@@ -149,7 +158,9 @@ class WriteReviewScreen extends StatelessWidget {
                             border: Border.all(color: colors.border),
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: Column(
+                          // Obx: a row's stars change when tapped
+                          child: Obx(
+                            () => Column(
                             // API: one row for every category
                             children: controller.categories.map((category) {
                               return Padding(
@@ -162,11 +173,21 @@ class WriteReviewScreen extends StatelessWidget {
                                         style: AppTextStyles.bodyMedium(),
                                       ),
                                     ),
-                                    StarRow(rating: category['rating'], size: 18),
+                                    StarRow(
+                                      rating: category['rating'],
+                                      size: 22,
+                                      onStarTap: (stars) {
+                                        controller.setCategoryRating(
+                                          category,
+                                          stars,
+                                        );
+                                      },
+                                    ),
                                   ],
                                 ),
                               );
                             }).toList(),
+                          ),
                           ),
                         ),
                         SizedBox(height: sh * 0.025),
@@ -192,6 +213,10 @@ class WriteReviewScreen extends StatelessWidget {
                               TextField(
                                 controller: controller.reviewController,
                                 keyboardType: TextInputType.multiline,
+                                // Every key typed updates the "84 / 500" counter
+                                onChanged: (text) {
+                                  controller.updateLetterCount(text);
+                                },
                                 minLines: 4,
                                 maxLines: 4,
                                 style: AppTextStyles.bodyLarge(),
@@ -212,10 +237,12 @@ class WriteReviewScreen extends StatelessWidget {
                               ),
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: Text(
-                                  controller.counterText,
-                                  style: AppTextStyles.caption(
-                                    color: colors.textMuted,
+                                child: Obx(
+                                  () => Text(
+                                    controller.counterText(),
+                                    style: AppTextStyles.caption(
+                                      color: colors.textMuted,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -304,7 +331,11 @@ class WriteReviewScreen extends StatelessWidget {
                       bgColor: colors.primary,
                       borderColor: colors.primary,
                       textColor: colors.textOnPrimary,
-                      onTap: () {},
+                      // Checks the text, goes back, shows "Thank you!"
+                      // Later (API): POST /reviews first.
+                      onTap: () {
+                        controller.postReview();
+                      },
                     ),
                   ),
                 ],

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/widgets/user/booking/booking_card.dart';
-import '../../../controller/user/booking/bookings_controller.dart';
+import 'package:hall_mate/controller/user/booking/bookings_controller.dart';
 
 // This is the "My bookings" tab.
 class BookingScreen extends StatelessWidget {
@@ -41,16 +41,20 @@ class BookingScreen extends StatelessWidget {
             SizedBox(height: sh * 0.02),
 
             // ── Status chips (scroll sideways) ──
-            SizedBox(
+            // Obx: the green chip moves when another chip is tapped.
+            // The value is read here first, because ListView builds the
+            // chips a moment later, outside the Obx.
+            Obx(() {
+            final int selected = controller.selectedFilterIndex.value;
+
+            return SizedBox(
               height: 40,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 // API: one chip for All and one for every status
                 itemCount: controller.filters.length,
                 itemBuilder: (context, index) {
-                  final filter = controller.filters[index];
-                  final bool isSelected =
-                      controller.selectedFilterIndex == index;
+                  final bool isSelected = selected == index;
 
                   return Padding(
                     padding: EdgeInsets.only(
@@ -58,9 +62,9 @@ class BookingScreen extends StatelessWidget {
                       right: 8,
                     ),
                     child: GestureDetector(
-                      // Later: set the selected chip in the controller
-                      // and show only the bookings with that status.
-                      onTap: () {},
+                      onTap: () {
+                        controller.selectFilter(index);
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         decoration: BoxDecoration(
@@ -74,7 +78,7 @@ class BookingScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              filter['label'],
+                              controller.filters[index],
                               style: AppTextStyles.titleSmall(
                                 color: isSelected ? colors.textOnPrimary : null,
                               ),
@@ -92,7 +96,8 @@ class BookingScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                filter['count'],
+                                // how many bookings have this status
+                                controller.countFor(index),
                                 style: AppTextStyles.labelTiny(
                                   color: isSelected
                                       ? colors.textOnAccent
@@ -107,15 +112,31 @@ class BookingScreen extends StatelessWidget {
                   );
                 },
               ),
-            ),
+            );
+            }),
             SizedBox(height: sh * 0.018),
 
             // ── Bookings list (this part scrolls up and down) ──
             Expanded(
-              child: SingleChildScrollView(
+              // Obx: the list changes when a chip is tapped
+              child: Obx(() {
+                final List<Map<String, dynamic>> list =
+                    controller.filteredBookings();
+
+                if (list.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
+                    child: Text(
+                      'No bookings here yet',
+                      style: AppTextStyles.bodyMedium(color: colors.textMuted),
+                    ),
+                  );
+                }
+
+                return SingleChildScrollView(
                 child: Column(
                   // API: one card for every booking in the list
-                  children: controller.bookings.map((booking) {
+                  children: list.map((booking) {
                     return Padding(
                       padding: EdgeInsets.only(
                         left: sw * 0.05,
@@ -134,7 +155,8 @@ class BookingScreen extends StatelessWidget {
                     );
                   }).toList(),
                 ),
-              ),
+                );
+              }),
             ),
           ],
         ),

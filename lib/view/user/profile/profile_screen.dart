@@ -274,12 +274,15 @@ class ProfileScreen extends StatelessWidget {
                     border: Border.all(color: colors.border),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: const ProfileRow(
+                  child: ProfileRow(
                     icon: Icons.logout_rounded,
                     title: 'Log out',
                     isDanger: true,
                     showDivider: false,
-                    // Later: clear the saved token and go to the Login screen
+                    // Goes back to the Login screen
+                    onTap: () {
+                      controller.logOut();
+                    },
                   ),
                 ),
               ],

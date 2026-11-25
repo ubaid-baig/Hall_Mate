@@ -3,13 +3,18 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
 /// The "- 300 +" box for choosing the number of guests.
-///
-/// Later: pass two functions (onMinus, onPlus) from the controller,
-/// and the number will change when they are tapped.
+/// The screen passes what happens on - and + (onMinus, onPlus).
 class GuestStepper extends StatelessWidget {
   final String value; // for example '300'
+  final VoidCallback? onMinus; // runs when - is tapped
+  final VoidCallback? onPlus; // runs when + is tapped
 
-  const GuestStepper({super.key, required this.value});
+  const GuestStepper({
+    super.key,
+    required this.value,
+    this.onMinus,
+    this.onPlus,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +31,7 @@ class GuestStepper extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            // Later: guests goes down by 10
-            onTap: () {},
+            onTap: onMinus,
             child: SizedBox(
               width: 44,
               height: 44,
@@ -41,8 +45,7 @@ class GuestStepper extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            // Later: guests goes up by 10
-            onTap: () {},
+            onTap: onPlus,
             child: Container(
               width: 44,
               height: 44,

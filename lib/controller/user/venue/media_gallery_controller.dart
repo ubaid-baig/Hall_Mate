@@ -13,24 +13,47 @@ class MediaGalleryController extends GetxController {
   // ══════════════════════════════════════════════════════════
 
   // ── Top bar ──
-  // API: position of the selected photo and the total
-  String counterText = '3 / 15';
   String venueName = 'Shaan Banquet Hall';
+  int totalPhotos = 15; // API: how many photos the venue has
 
-  // ── Big picture and its title ──
-  String bigPhoto = 'marigold'; // DUMMY ONLY
-  String bigLabel = 'Stage décor'; // DUMMY ONLY
-  String photoTitle = 'Main stage · white & gold setup';
+  // ── The photos (small pictures row) ──
+  // 'photo' is DUMMY ONLY (a colour). 'label' is written on the big picture,
+  // 'title' is the line under it.
+  List<Map<String, String>> thumbs = [
+    {'photo': 'emerald', 'label': 'Main hall', 'title': 'Main hall · 500 seats'},
+    {'photo': 'marigold', 'label': 'Entrance', 'title': 'Entrance · flower arch'},
+    {'photo': 'marigold', 'label': 'Stage décor', 'title': 'Main stage · white & gold setup'},
+    {'photo': 'slate', 'label': 'Family hall', 'title': 'Family hall · separate entry'},
+    {'photo': 'emerald', 'label': 'Dining', 'title': 'Dining area · buffet line'},
+  ];
   String uploadedBy = 'Uploaded by the venue · Nov 2026';
 
-  // ── Small pictures row ──
-  // Which one is selected (index in the list). Later: make it RxInt.
-  int selectedThumbIndex = 2;
-  List<String> thumbs = ['emerald', 'marigold', 'marigold', 'slate', 'emerald'];
+  // Which photo is selected. .obs because Obx shows it.
+  RxInt selectedThumbIndex = 2.obs;
+
+  // Called when a small picture is tapped
+  void selectThumb(int index) {
+    selectedThumbIndex.value = index;
+  }
+
+  // "3 / 15"
+  String counterText() {
+    return '${selectedThumbIndex.value + 1} / $totalPhotos';
+  }
+
+  // The selected photo (its photo, label and title)
+  Map<String, String> selectedPhoto() {
+    return thumbs[selectedThumbIndex.value];
+  }
 
   // ── Tabs ──
-  // Which tab is selected: 0 = Photos, 1 = Videos. Later: make it RxInt.
-  int selectedTabIndex = 0;
+  // Which tab is selected: 0 = Photos, 1 = Videos.
+  RxInt selectedTabIndex = 0.obs;
+
+  void selectTab(int index) {
+    selectedTabIndex.value = index;
+  }
+
   String photosTab = 'Photos (15)';
   String videosTab = 'Videos (1)';
 

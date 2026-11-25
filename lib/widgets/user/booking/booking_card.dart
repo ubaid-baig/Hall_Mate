@@ -6,6 +6,7 @@ import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
 import 'package:hall_mate/widgets/common/photo_placeholder.dart';
 import 'package:hall_mate/widgets/common/status_chip.dart';
 import 'package:hall_mate/view/user/booking/write_review_screen.dart';
+import 'package:hall_mate/view/user/booking/booking_confirmed_screen.dart';
 
 /// One booking in the "My bookings" list.
 ///
@@ -107,8 +108,13 @@ class BookingCard extends StatelessWidget {
                   // and load GET /bookings/{id} in BookingDetailController.
                   onPressed: () {
                     if (status == 'Completed') {
+                      // "Write a review"
                       Get.to(() => const WriteReviewScreen());
+                    } else if (status == 'Confirmed') {
+                      // "Receipt": the booking confirmed screen
+                      Get.to(() => const BookingConfirmedScreen());
                     } else {
+                      // "Reply" / "View"
                       Get.to(() => const BookingDetailScreen());
                     }
                   },

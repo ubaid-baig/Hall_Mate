@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/view/auth/login_screen.dart';
+import 'package:hall_mate/controller/shared/nav_controller.dart';
 
 class ProfileController extends GetxController {
   // ══════════════════════════════════════════════════════════
@@ -13,7 +15,6 @@ class ProfileController extends GetxController {
   String phone = '+92 300 1234567';
   String role = 'Customer'; // API: Customer or Venue manager
   String cardEnding = '4242';
-  String savedVenuesCount = '3';
   String language = 'English';
 
   // The Notifications Switch. It is .obs because an Obx watches it.
@@ -22,5 +23,13 @@ class ProfileController extends GetxController {
 
   void toggleNotifications(bool value) {
     isNotificationsOn.value = value;
+  }
+
+  // "Log out": back to the Login screen, and every screen behind is removed.
+  // The bottom bar goes back to Home for next time.
+  // Later (API): also delete the saved token (shared preferences).
+  void logOut() {
+    Get.find<NavController>().changeIndex(0);
+    Get.offAll(() => const LoginScreen());
   }
 }

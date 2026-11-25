@@ -16,6 +16,7 @@ class ConversationTile extends StatelessWidget {
   final int unreadCount; // API: number of unread messages
   final String avatarStyle; // DUMMY ONLY: emerald, marigold, slate or primary
   final bool showDivider; // false for the last row
+  final VoidCallback? onTap; // runs when the row is tapped
 
   const ConversationTile({
     super.key,
@@ -26,6 +27,7 @@ class ConversationTile extends StatelessWidget {
     required this.unreadCount,
     required this.avatarStyle,
     required this.showDivider,
+    this.onTap,
   });
 
   @override
@@ -51,9 +53,12 @@ class ConversationTile extends StatelessWidget {
       // Opens the Chat room.
       // API: send this conversation's id along, for example
       // Get.to(() => ChatRoomScreen(), arguments: conversationId)
-      onTap: () {
-        Get.to(() => const ChatRoomScreen());
-      },
+      // The screen passes what happens on tap (see ChatController.openChat).
+      // If it passes nothing, the Chat room opens.
+      onTap: onTap ??
+          () {
+            Get.to(() => const ChatRoomScreen());
+          },
       child: Column(
         children: [
           Padding(

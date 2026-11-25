@@ -158,21 +158,29 @@ class PaymentScreen extends StatelessWidget {
                             border: Border.all(color: colors.border),
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: Column(
-                            // API: one row for every payment method in the list
-                            children: controller.methods.map((method) {
-                              final int index = controller.methods.indexOf(method);
+                          // Obx: the selected row moves when another row is tapped
+                          child: Obx(
+                            () => Column(
+                              // API: one row for every payment method in the list
+                              children: controller.methods.map((method) {
+                                final int index = controller.methods.indexOf(method);
 
-                              return PaymentMethodTile(
-                                iconType: method['iconType']!,
-                                title: method['title']!,
-                                subtitle: method['subtitle']!,
-                                // Later: tapping a row changes selectedMethodIndex
-                                isSelected: index == controller.selectedMethodIndex,
-                                isFirst: index == 0,
-                                isLast: index == controller.methods.length - 1,
-                              );
-                            }).toList(),
+                                return GestureDetector(
+                                  onTap: () {
+                                    controller.selectMethod(index);
+                                  },
+                                  child: PaymentMethodTile(
+                                    iconType: method['iconType']!,
+                                    title: method['title']!,
+                                    subtitle: method['subtitle']!,
+                                    isSelected: index ==
+                                        controller.selectedMethodIndex.value,
+                                    isFirst: index == 0,
+                                    isLast: index == controller.methods.length - 1,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),

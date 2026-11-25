@@ -63,6 +63,10 @@ class CounterOfferSheet extends StatelessWidget {
             TextField(
               controller: controller.priceController,
               keyboardType: TextInputType.number,
+              // Every key typed updates the total below
+              onChanged: (text) {
+                controller.updateCounterPrice(text);
+              },
               style: AppTextStyles.bodyLarge(),
               decoration: InputDecoration(
                 filled: true,
@@ -73,6 +77,8 @@ class CounterOfferSheet extends StatelessWidget {
                   size: 20,
                   color: colors.textSecondary,
                 ),
+                hintText: 'Price per head',
+                hintStyle: AppTextStyles.bodyLarge(color: colors.textMuted),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(color: colors.border),
@@ -96,11 +102,19 @@ class CounterOfferSheet extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    controller.guestsCalcText,
-                    style: AppTextStyles.bodySmall(color: colors.textMuted),
+                  // Obx: both change while you type
+                  Obx(
+                    () => Text(
+                      controller.guestsCalcText(),
+                      style: AppTextStyles.bodySmall(color: colors.textMuted),
+                    ),
                   ),
-                  Text(controller.totalText, style: AppTextStyles.titleSmall()),
+                  Obx(
+                    () => Text(
+                      controller.totalText(),
+                      style: AppTextStyles.titleSmall(),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -135,9 +149,18 @@ class CounterOfferSheet extends StatelessWidget {
                     bgColor: colors.primary,
                     borderColor: colors.primary,
                     textColor: colors.textOnPrimary,
-                    // Later: send the new price to the API (POST /bookings/{id}/offers),
-                    // then close the sheet with Navigator.pop(context).
-                    onTap: () {},
+                    // Adds your offer to the list, closes the sheet
+                    // and shows a message.
+                    onTap: () {
+                      final bool isSent = controller.sendCounterOffer();
+                      if (isSent) {
+                        Navigator.pop(context);
+                        Get.snackbar(
+                          'Counter offer sent',
+                          'The venue has 24 hours to reply',
+                        );
+                      }
+                    },
                   ),
                 ),
               ],

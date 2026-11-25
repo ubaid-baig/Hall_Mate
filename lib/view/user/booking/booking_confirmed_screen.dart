@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/view/user/nav_bar_widget.dart';
+import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
 import 'package:hall_mate/widgets/common/detail_row.dart';
 
@@ -143,8 +144,11 @@ class BookingConfirmedScreen extends StatelessWidget {
                     bgColor: colors.primary,
                     borderColor: colors.primary,
                     textColor: colors.textOnPrimary,
-                    // Later: open the Booking detail screen of this booking
-                    onTap: () {},
+                    // Opens the Booking detail screen.
+                    // Later (API): send this booking's id along.
+                    onTap: () {
+                      Get.to(() => const BookingDetailScreen());
+                    },
                   ),
                   const SizedBox(height: 10),
                   ActionButton(
@@ -154,8 +158,14 @@ class BookingConfirmedScreen extends StatelessWidget {
                     bgColor: colors.bgSurface,
                     borderColor: colors.borderStrong,
                     textColor: colors.textPrimary,
-                    // Later: save the receipt as a PDF
-                    onTap: () {},
+                    // Later: save the receipt as a PDF (needs a package).
+                    // For now it only shows a message.
+                    onTap: () {
+                      Get.snackbar(
+                        'Receipt',
+                        'Downloading the receipt will be added later',
+                      );
+                    },
                   ),
                   TextButton(
                     // Goes back to the home screen with the bottom bar.

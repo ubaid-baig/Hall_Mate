@@ -53,7 +53,13 @@ class SearchScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // API: the venue type that was searched
-                        Text(controller.title, style: AppTextStyles.h3()),
+                        // Obx: "Banquet venues" when a type is chosen in Filters
+                        Obx(
+                          () => Text(
+                            controller.title(),
+                            style: AppTextStyles.h3(),
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         // Obx: the number changes while you type
                         Obx(
@@ -134,7 +140,7 @@ class SearchScreen extends StatelessWidget {
 
                   // Stack: the filter button is the base, Positioned puts the
                   // orange number badge on its top right corner.
-                  // Obx: the number goes down when a chip's x is tapped.
+                  // Obx: the number follows the chosen filters.
                   Obx(
                     () => Stack(
                     children: [
@@ -158,7 +164,7 @@ class SearchScreen extends StatelessWidget {
                         ),
                       ),
                       // No badge when there are no filters
-                      if (controller.filterChips.isNotEmpty)
+                      if (controller.activeChips().isNotEmpty)
                       Positioned(
                         top: 4,
                         right: 4,
@@ -171,8 +177,8 @@ class SearchScreen extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              // How many filter chips there are
-                              '${controller.filterChips.length}',
+                              // How many filters are chosen
+                              '${controller.activeChips().length}',
                               style: AppTextStyles.labelTiny(
                                 color: colors.textOnAccent,
                               ),
@@ -189,17 +195,23 @@ class SearchScreen extends StatelessWidget {
             SizedBox(height: sh * 0.015),
 
             // ── Active filter chips (scroll sideways) ──
-            // Obx: a chip disappears when its x is tapped.
-            // (itemCount reads filterChips here, inside the Obx.)
-            Obx(
-              () => controller.filterChips.isEmpty
-                  ? const SizedBox()
-                  : SizedBox(
+            // One chip for every choice in the Filters sheet.
+            // No choice = no chips (an empty SizedBox).
+            // Obx: the chips change when filters are chosen or removed.
+            // The list is made here first, because ListView builds the
+            // chips a moment later, outside the Obx.
+            Obx(() {
+              final List<Map<String, String>> chips = controller.activeChips();
+
+              if (chips.isEmpty) {
+                return const SizedBox();
+              }
+
+              return SizedBox(
               height: 38,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                // API: the filters the user chose
-                itemCount: controller.filterChips.length,
+                itemCount: chips.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: EdgeInsets.only(
@@ -216,7 +228,7 @@ class SearchScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            controller.filterChips[index],
+                            chips[index]['label']!,
                             style: AppTextStyles.titleSmall(
                               color: colors.primaryInk,
                             ),
@@ -225,7 +237,7 @@ class SearchScreen extends StatelessWidget {
                           // Tap the x to remove this filter
                           GestureDetector(
                             onTap: () {
-                              controller.removeChip(index);
+                              controller.removeChip(chips[index]);
                             },
                             child: Icon(
                               Icons.close,
@@ -239,8 +251,8 @@ class SearchScreen extends StatelessWidget {
                   );
                 },
               ),
-            ),
-            ),
+            );
+            }),
             SizedBox(height: sh * 0.008),
 
             // ── "Free on ..." text and sort button ──
@@ -250,9 +262,12 @@ class SearchScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      controller.freeOnText,
-                      style: AppTextStyles.bodySmall(color: colors.textMuted),
+                    // Obx: shows the date chosen in Filters, or "Any date"
+                    child: Obx(
+                      () => Text(
+                        controller.freeOnText(),
+                        style: AppTextStyles.bodySmall(color: colors.textMuted),
+                      ),
                     ),
                   ),
                   TextButton(

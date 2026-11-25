@@ -180,17 +180,20 @@ class ChatRoomScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: sh * 0.018),
-                        Column(
-                          // API: one bubble for every message in the list
-                          children: controller.messages.map((message) {
-                            return MessageBubble(
-                              isMine: message['isMine'],
-                              text: message['text'],
-                              time: message['time'] ?? '',
-                              imageLabel: message['imageLabel'],
-                              photoStyle: message['photo'] ?? 'emerald',
-                            );
-                          }).toList(),
+                        // Obx: a new bubble appears when you send a message
+                        Obx(
+                          () => Column(
+                            // API: one bubble for every message in the list
+                            children: controller.messages.map((message) {
+                              return MessageBubble(
+                                isMine: message['isMine'],
+                                text: message['text'],
+                                time: message['time'] ?? '',
+                                imageLabel: message['imageLabel'],
+                                photoStyle: message['photo'] ?? 'emerald',
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ],
                     ),
@@ -234,6 +237,10 @@ class ChatRoomScreen extends StatelessWidget {
                           child: TextField(
                             controller: controller.messageController,
                             textInputAction: TextInputAction.send,
+                            // The keyboard's send key also sends
+                            onSubmitted: (text) {
+                              controller.sendMessage();
+                            },
                             style: AppTextStyles.bodyLarge(),
                             decoration: InputDecoration(
                               filled: true,
@@ -259,9 +266,11 @@ class ChatRoomScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         GestureDetector(
-                          // Later: send the message
-                          // (POST /conversations/{id}/messages) and clear the field
-                          onTap: () {},
+                          // Adds your message and clears the field.
+                          // Later (API): POST /conversations/{id}/messages
+                          onTap: () {
+                            controller.sendMessage();
+                          },
                           child: Container(
                             width: 44,
                             height: 44,

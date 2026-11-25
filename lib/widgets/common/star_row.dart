@@ -5,27 +5,38 @@ import 'package:hall_mate/constants/app_colors.dart';
 /// the others are empty outlines.
 ///
 /// API: rating comes from the review (1 to 5).
-/// Later: wrap each star in a GestureDetector so the user can tap a rating.
+///
+/// onStarTap is optional. If the screen passes it, the stars can be
+/// tapped, and it receives the number of the tapped star (1 to 5).
 class StarRow extends StatelessWidget {
   final int rating; // 0 to 5
   final double size; // size of one star
   final double gap; // space between the stars
+  // A function that receives a number: void Function(int)
+  final void Function(int)? onStarTap;
 
   const StarRow({
     super.key,
     required this.rating,
     this.size = 18,
     this.gap = 2,
+    this.onStarTap,
   });
 
   // One star: filled if the rating reaches this position, outline if not.
   Widget _star(AppColors colors, int position) {
     final bool isFilled = rating >= position;
 
-    return Icon(
-      isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
-      size: size,
-      color: isFilled ? colors.iconStar : colors.borderStrong,
+    return GestureDetector(
+      onTap: () {
+        // Only if the screen passed a function (?. means "if not null")
+        onStarTap?.call(position);
+      },
+      child: Icon(
+        isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+        size: size,
+        color: isFilled ? colors.iconStar : colors.borderStrong,
+      ),
     );
   }
 

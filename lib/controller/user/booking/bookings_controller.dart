@@ -12,18 +12,49 @@ class BookingsController extends GetxController {
   //    Requested, Negotiating, Accepted, Confirmed, Completed.
   // ══════════════════════════════════════════════════════════
 
-  // Which chip is selected (0 = All).
-  // Later: make it RxInt and change it when a chip is tapped.
-  int selectedFilterIndex = 0;
-
-  // API: count how many bookings have each status.
-  List<Map<String, dynamic>> filters = [
-    {'label': 'All', 'count': '4'},
-    {'label': 'Requested', 'count': '1'},
-    {'label': 'Negotiating', 'count': '1'},
-    {'label': 'Confirmed', 'count': '1'},
-    {'label': 'Completed', 'count': '1'},
+  // The chips. Each one (except All) is a status.
+  List<String> filters = [
+    'All',
+    'Requested',
+    'Negotiating',
+    'Confirmed',
+    'Completed',
   ];
+
+  // Which chip is selected (0 = All). .obs because Obx watches it.
+  RxInt selectedFilterIndex = 0.obs;
+
+  void selectFilter(int index) {
+    selectedFilterIndex.value = index;
+  }
+
+  // The number on a chip: how many bookings have that status
+  String countFor(int index) {
+    if (index == 0) {
+      return '${bookings.length}';
+    }
+    int count = 0;
+    for (var booking in bookings) {
+      if (booking['status'] == filters[index]) {
+        count = count + 1;
+      }
+    }
+    return '$count';
+  }
+
+  // Only the bookings of the selected chip (or all of them)
+  List<Map<String, dynamic>> filteredBookings() {
+    if (selectedFilterIndex.value == 0) {
+      return bookings;
+    }
+    List<Map<String, dynamic>> result = [];
+    for (var booking in bookings) {
+      if (booking['status'] == filters[selectedFilterIndex.value]) {
+        result.add(booking);
+      }
+    }
+    return result;
+  }
 
   // API: GET /bookings
   // 'infoText' is the small line on the left of the button.

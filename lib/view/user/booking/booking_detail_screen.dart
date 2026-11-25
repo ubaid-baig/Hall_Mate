@@ -266,7 +266,9 @@ class BookingDetailScreen extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: sh * 0.012),
-                      Column(
+                      // Obx: a new bubble appears after you send a counter offer
+                      Obx(
+                        () => Column(
                         // API: one bubble for every offer in the list.
                         // Offers sent by me sit on the right, the others on the left.
                         children: controller.offers.map((offer) {
@@ -291,6 +293,7 @@ class BookingDetailScreen extends StatelessWidget {
                           );
                         }).toList(),
                       ),
+                      ),
                     ],
                   ),
                 ),
@@ -311,10 +314,13 @@ class BookingDetailScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         // API: who sent the latest offer and when it expires
-                        Text(
-                          controller.latestOfferNote,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.caption(color: colors.textMuted),
+                        // Obx: changes after you send a counter offer
+                        Obx(
+                          () => Text(
+                            controller.latestOfferNote.value,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.caption(color: colors.textMuted),
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Row(
@@ -347,18 +353,40 @@ class BookingDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: ActionButton(
-                                // API: the amount = latest offer price x guests
-                                label: controller.acceptText,
-                                bgColor: colors.primary,
-                                borderColor: colors.primary,
-                                textColor: colors.textOnPrimary,
-                                // Later: accept the offer first (POST /bookings/{id}/accept)
-                                // and only then open the Payment screen.
-                                onTap: () {
-                                  Get.to(() => const PaymentScreen());
-                                },
-                              ),
+                              // Obx: after your counter offer, Accept turns grey
+                              // (you wait for the venue's answer).
+                              child: Obx(() {
+                                final bool isWaiting =
+                                    controller.isWaitingForThem.value;
+
+                                return ActionButton(
+                                  // API: the amount = latest offer price x guests
+                                  label: isWaiting
+                                      ? 'Waiting for reply'
+                                      : controller.acceptText,
+                                  bgColor: isWaiting
+                                      ? colors.bgSubtle
+                                      : colors.primary,
+                                  borderColor: isWaiting
+                                      ? colors.border
+                                      : colors.primary,
+                                  textColor: isWaiting
+                                      ? colors.textMuted
+                                      : colors.textOnPrimary,
+                                  // Later: accept the offer first
+                                  // (POST /bookings/{id}/accept), then pay.
+                                  onTap: () {
+                                    if (isWaiting) {
+                                      Get.snackbar(
+                                        'Waiting for reply',
+                                        'You can accept once the venue answers',
+                                      );
+                                    } else {
+                                      Get.to(() => const PaymentScreen());
+                                    }
+                                  },
+                                );
+                              }),
                             ),
                           ],
                         ),

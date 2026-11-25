@@ -111,7 +111,6 @@ class VenueDetailController extends GetxController {
   void selectDate(int index) {
     selectedDateIndex.value = index;
   }
-
   List<Map<String, dynamic>> dates = [
     {'day': 'Mon', 'date': '14', 'isLunchFree': true, 'isDinnerFree': true},
     {'day': 'Tue', 'date': '15', 'isLunchFree': true, 'isDinnerFree': false},
@@ -180,7 +179,7 @@ class VenueDetailController extends GetxController {
       'subtitle': 'Walima · Nov 2026',
       'rating': 5,
       'text':
-      'The food was excellent and the staff handled 400 guests without any delay. The family hall was a big plus.',
+          'The food was excellent and the staff handled 400 guests without any delay. The family hall was a big plus.',
       'managerReply': 'Thank you, Sana! It was a pleasure hosting your family.',
     },
   ];

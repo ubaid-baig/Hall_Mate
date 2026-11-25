@@ -5,12 +5,16 @@ import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
 import 'package:hall_mate/widgets/common/guest_stepper.dart';
 
-import '../../../controller/user/venue/filters_controller.dart';
+import 'package:hall_mate/controller/user/venue/filters_controller.dart';
+import 'package:hall_mate/controller/shared/nav_controller.dart';
 
 /// The "Filters" bottom sheet. It is opened from the filter button
 /// on the Home screen and on the Search results screen.
 ///
 /// Both screens call the same one line:  FiltersSheet.show(context);
+///
+/// Every tap changes FiltersController straight away, and the Search
+/// screen reads the same controller (its chips and its list).
 class FiltersSheet extends StatelessWidget {
   const FiltersSheet({super.key});
 
@@ -125,8 +129,10 @@ class FiltersSheet extends StatelessWidget {
                 children: [
                   Text('Filters', style: AppTextStyles.h2()),
                   TextButton(
-                    // Later: put every filter back to its start value
-                    onPressed: () {},
+                    // Every filter back to "nothing chosen"
+                    onPressed: () {
+                      controller.clearAll();
+                    },
                     child: Text(
                       'Reset',
                       style: AppTextStyles.titleSmall(color: colors.primaryInk),
@@ -139,35 +145,53 @@ class FiltersSheet extends StatelessWidget {
               // ── Venue type ──
               Text('Venue type', style: AppTextStyles.titleSmall()),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _chip(
-                      colors,
-                      'Ballroom',
-                      controller.selectedTypeIndex == 0,
-                      true,
+              // Obx: the green chip moves when another type is tapped
+              Obx(
+                () => Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.selectType(0);
+                        },
+                        child: _chip(
+                          colors,
+                          controller.types[0],
+                          controller.selectedTypeIndex.value == 0,
+                          true,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _chip(
-                      colors,
-                      'Banquet',
-                      controller.selectedTypeIndex == 1,
-                      true,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.selectType(1);
+                        },
+                        child: _chip(
+                          colors,
+                          controller.types[1],
+                          controller.selectedTypeIndex.value == 1,
+                          true,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _chip(
-                      colors,
-                      'Outdoor',
-                      controller.selectedTypeIndex == 2,
-                      true,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.selectType(2);
+                        },
+                        child: _chip(
+                          colors,
+                          controller.types[2],
+                          controller.selectedTypeIndex.value == 2,
+                          true,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 18),
 
@@ -181,7 +205,20 @@ class FiltersSheet extends StatelessWidget {
                       children: [
                         Text('Date', style: AppTextStyles.titleSmall()),
                         const SizedBox(height: 10),
-                        Container(
+                        // Tap the box to pick a date
+                        GestureDetector(
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2026),
+                              lastDate: DateTime(2028),
+                            );
+                            if (picked != null) {
+                              controller.setDate(picked);
+                            }
+                          },
+                          child: Container(
                           height: 48,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
@@ -197,12 +234,22 @@ class FiltersSheet extends StatelessWidget {
                                 color: colors.primaryInk,
                               ),
                               const SizedBox(width: 10),
-                              Text(
-                                controller.dateText,
-                                style: AppTextStyles.bodyMedium(),
+                              // Obx: shows the picked date, or "Any date"
+                              Obx(
+                                () => Text(
+                                  controller.dateText.value == ''
+                                      ? 'Any date'
+                                      : controller.dateText.value,
+                                  style: AppTextStyles.bodyMedium(
+                                    color: controller.dateText.value == ''
+                                        ? colors.textMuted
+                                        : null,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
+                        ),
                         ),
                       ],
                     ),
@@ -220,23 +267,36 @@ class FiltersSheet extends StatelessWidget {
                             color: colors.bgSubtle,
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _segment(
-                                  colors,
-                                  'Dinner',
-                                  controller.selectedSlotIndex == 0,
+                          // Obx: the white half moves when the other is tapped
+                          child: Obx(
+                            () => Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      controller.selectSlot(0);
+                                    },
+                                    child: _segment(
+                                      colors,
+                                      controller.slots[0],
+                                      controller.selectedSlotIndex.value == 0,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                child: _segment(
-                                  colors,
-                                  'Lunch',
-                                  controller.selectedSlotIndex == 1,
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      controller.selectSlot(1);
+                                    },
+                                    child: _segment(
+                                      colors,
+                                      controller.slots[1],
+                                      controller.selectedSlotIndex.value == 1,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -261,7 +321,18 @@ class FiltersSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  GuestStepper(value: controller.guestsText),
+                  // Obx: the number changes on - and + (50 at a time)
+                  Obx(
+                    () => GuestStepper(
+                      value: controller.guestsText(),
+                      onMinus: () {
+                        controller.removeGuests();
+                      },
+                      onPlus: () {
+                        controller.addGuests();
+                      },
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 18),
@@ -341,47 +412,90 @@ class FiltersSheet extends StatelessWidget {
               // ── Amenities (two rows of chips) ──
               Text('Amenities', style: AppTextStyles.titleSmall()),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  _chip(
-                    colors,
-                    controller.amenities[0]['label'],
-                    controller.amenities[0]['isSelected'],
-                    false,
-                  ),
-                  const SizedBox(width: 8),
-                  _chip(
-                    colors,
-                    controller.amenities[1]['label'],
-                    controller.amenities[1]['isSelected'],
-                    false,
-                  ),
-                  const SizedBox(width: 8),
-                  _chip(
-                    colors,
-                    controller.amenities[2]['label'],
-                    controller.amenities[2]['isSelected'],
-                    false,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _chip(
-                    colors,
-                    controller.amenities[3]['label'],
-                    controller.amenities[3]['isSelected'],
-                    false,
-                  ),
-                  const SizedBox(width: 8),
-                  _chip(
-                    colors,
-                    controller.amenities[4]['label'],
-                    controller.amenities[4]['isSelected'],
-                    false,
-                  ),
-                ],
+              // Obx: a chip turns green when tapped, white when tapped again
+              Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        controller.toggleAmenity(controller.amenities[0]);
+                      },
+                      child: _chip(
+                        colors,
+                        controller.amenities[0],
+                        controller.selectedAmenities.contains(
+                          controller.amenities[0],
+                        ),
+                        false,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        controller.toggleAmenity(controller.amenities[1]);
+                      },
+                      child: _chip(
+                        colors,
+                        controller.amenities[1],
+                        controller.selectedAmenities.contains(
+                          controller.amenities[1],
+                        ),
+                        false,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        controller.toggleAmenity(controller.amenities[2]);
+                      },
+                      child: _chip(
+                        colors,
+                        controller.amenities[2],
+                        controller.selectedAmenities.contains(
+                          controller.amenities[2],
+                        ),
+                        false,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        controller.toggleAmenity(controller.amenities[3]);
+                      },
+                      child: _chip(
+                        colors,
+                        controller.amenities[3],
+                        controller.selectedAmenities.contains(
+                          controller.amenities[3],
+                        ),
+                        false,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        controller.toggleAmenity(controller.amenities[4]);
+                      },
+                      child: _chip(
+                        colors,
+                        controller.amenities[4],
+                        controller.selectedAmenities.contains(
+                          controller.amenities[4],
+                        ),
+                        false,
+                      ),
+                    ),
+                  ],
+                ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -396,23 +510,26 @@ class FiltersSheet extends StatelessWidget {
                       bgColor: colors.bgSurface,
                       borderColor: colors.borderStrong,
                       textColor: colors.textPrimary,
-                      // Later: put every filter back to its start value
-                      onTap: () {},
+                      // Every filter back to "nothing chosen"
+                      onTap: () {
+                        controller.clearAll();
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: ActionButton(
-                      // API: the number of venues that match
-                      label: controller.showButtonText,
+                      label: 'Show venues',
                       height: 52,
                       bgColor: colors.primary,
                       borderColor: colors.primary,
                       textColor: colors.textOnPrimary,
-                      // Closes the sheet.
-                      // Later: also send the filters to the API and show the results.
+                      // Closes the sheet and opens the Search tab (tab 1),
+                      // which shows the chosen filters and the matching venues.
+                      // Later (API): send the filters to the server here.
                       onTap: () {
                         Navigator.pop(context);
+                        Get.find<NavController>().changeIndex(1);
                       },
                     ),
                   ),

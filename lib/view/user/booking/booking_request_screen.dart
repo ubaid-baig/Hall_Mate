@@ -140,7 +140,7 @@ class BookingRequestScreen extends StatelessWidget {
                               Expanded(
                                 // Obx: the text changes after a new date is picked
                                 child: Obx(
-                                      () => Text(
+                                  () => Text(
                                     controller.eventDateText(),
                                     style: AppTextStyles.titleSmall(),
                                   ),
@@ -178,7 +178,7 @@ class BookingRequestScreen extends StatelessWidget {
                         // Obx: the green slot moves when the other one is tapped.
                         // (A booked slot cannot be selected, see selectSlot.)
                         Obx(
-                              () => Row(
+                          () => Row(
                             children: [
                               Expanded(
                                 child: GestureDetector(
@@ -190,7 +190,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     note: controller.slots[0]['note'],
                                     isAvailable: controller.slots[0]['isAvailable'],
                                     isSelected:
-                                    controller.selectedSlotIndex.value == 0,
+                                        controller.selectedSlotIndex.value == 0,
                                   ),
                                 ),
                               ),
@@ -205,7 +205,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     note: controller.slots[1]['note'],
                                     isAvailable: controller.slots[1]['isAvailable'],
                                     isSelected:
-                                    controller.selectedSlotIndex.value == 1,
+                                        controller.selectedSlotIndex.value == 1,
                                   ),
                                 ),
                               ),
@@ -260,7 +260,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     child: Center(
                                       // Obx: the number changes on - and +
                                       child: Obx(
-                                            () => Text(
+                                        () => Text(
                                           '${controller.guests.value}',
                                           style: AppTextStyles.titleLarge(),
                                         ),
@@ -298,7 +298,7 @@ class BookingRequestScreen extends StatelessWidget {
                         const SizedBox(height: 10),
                         // Obx: the selected package moves when the other is tapped
                         Obx(
-                              () => Row(
+                          () => Row(
                             children: [
                               Expanded(
                                 child: GestureDetector(
@@ -309,7 +309,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     name: controller.packages[0]['name'],
                                     price: controller.packages[0]['price'],
                                     isSelected:
-                                    controller.selectedPackageIndex.value == 0,
+                                        controller.selectedPackageIndex.value == 0,
                                   ),
                                 ),
                               ),
@@ -323,7 +323,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     name: controller.packages[1]['name'],
                                     price: controller.packages[1]['price'],
                                     isSelected:
-                                    controller.selectedPackageIndex.value == 1,
+                                        controller.selectedPackageIndex.value == 1,
                                   ),
                                 ),
                               ),
@@ -399,7 +399,7 @@ class BookingRequestScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         // Obx: changes with the offer and the package
                         Obx(
-                              () => Text(
+                          () => Text(
                             controller.compareText(),
                             style: AppTextStyles.bodySmall(
                               color: colors.accentStrongInk,
@@ -424,7 +424,7 @@ class BookingRequestScreen extends StatelessWidget {
                                 children: [
                                   // Obx: these change with guests and offer
                                   Obx(
-                                        () => Text(
+                                    () => Text(
                                       controller.guestsCalcText(),
                                       style: AppTextStyles.bodyMedium(
                                         color: colors.textMuted,
@@ -432,7 +432,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Obx(
-                                        () => Text(
+                                    () => Text(
                                       controller.formatRs(controller.total()),
                                       style: AppTextStyles.titleMedium(),
                                     ),
@@ -450,7 +450,7 @@ class BookingRequestScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Obx(
-                                        () => Text(
+                                    () => Text(
                                       controller.formatRs(controller.advance()),
                                       style: AppTextStyles.titleMedium(),
                                     ),
@@ -514,7 +514,7 @@ class BookingRequestScreen extends StatelessWidget {
                             ),
                             // Obx: the same total as in the summary card
                             Obx(
-                                  () => Text(
+                              () => Text(
                                 controller.formatRs(controller.total()),
                                 style: AppTextStyles.h2(),
                               ),

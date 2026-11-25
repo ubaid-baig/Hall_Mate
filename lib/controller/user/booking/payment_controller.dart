@@ -31,7 +31,13 @@ class PaymentController extends GetxController {
   // ── Payment methods ──
   // 'iconType' decides the picture: card, wallet or bank.
   // Which method is selected (index in the list). Later: make it RxInt.
-  int selectedMethodIndex = 0;
+  // .obs because Obx shows which row is selected.
+  RxInt selectedMethodIndex = 0.obs;
+
+  // Called when a payment method row is tapped
+  void selectMethod(int index) {
+    selectedMethodIndex.value = index;
+  }
   List<Map<String, String>> methods = [
     {
       'iconType': 'card',

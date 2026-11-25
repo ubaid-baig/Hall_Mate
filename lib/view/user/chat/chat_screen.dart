@@ -60,6 +60,10 @@ class ChatScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
               child: TextField(
+                // Every letter typed filters the list below
+                onChanged: (text) {
+                  controller.updateSearch(text);
+                },
                 textInputAction: TextInputAction.search,
                 style: AppTextStyles.bodyLarge(),
                 decoration: InputDecoration(
@@ -101,9 +105,27 @@ class ChatScreen extends StatelessWidget {
                       border: Border.all(color: colors.border),
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: Column(
+                    // Obx: the list changes while you type,
+                    // and the unread badge goes away when a chat is opened
+                    child: Obx(() {
+                      final List<Map<String, dynamic>> chats =
+                          controller.filteredConversations();
+
+                      if (chats.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'No conversations found',
+                            style: AppTextStyles.bodyMedium(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return Column(
                       // API: one row for every conversation in the list
-                      children: controller.conversations.map((chat) {
+                      children: chats.map((chat) {
                         return ConversationTile(
                           initials: chat['initials'],
                           name: chat['name'],
@@ -112,10 +134,14 @@ class ChatScreen extends StatelessWidget {
                           unreadCount: chat['unreadCount'],
                           avatarStyle: chat['avatar'],
                           // no line under the last row
-                          showDivider: chat != controller.conversations.last,
+                          showDivider: chat != chats.last,
+                          onTap: () {
+                            controller.openChat(chat);
+                          },
                         );
                       }).toList(),
-                    ),
+                    );
+                    }),
                   ),
                 ),
               ),
