@@ -36,14 +36,13 @@ class FiltersController extends GetxController {
 
   // ── Date ── '' = any date. The date box opens the date picker.
   RxString dateText = ''.obs;
-
   List<String> dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   List<String> monthNames = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ];
 
-  // Called after a date is picked: saves it as "Sat, 19 Dec"
+  // Called after a date is picked: saves it as "Sat, 19   Dec"
   void setDate(DateTime date) {
     dateText.value =
         '${dayNames[date.weekday - 1]}, ${date.day} ${monthNames[date.month - 1]}';
