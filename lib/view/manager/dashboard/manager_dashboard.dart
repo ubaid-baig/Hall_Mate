@@ -3,9 +3,8 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import '../../../controller/manager/dashboard/manager_dashboard.dart';
+import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
 
-// Accent colour used for "Details", badges and offers.
-// If your AppColors already has an accent/orange, replace this with it.
 const Color _accent = Color(0xFFF5A83B);
 
 class ManagerDashboardScreen extends StatelessWidget {
@@ -60,7 +59,7 @@ class ManagerDashboardScreen extends StatelessWidget {
                       title: 'Venue details',
                       subtitle: 'Banquet form',
                       onTap: () {
-                        // Get.to(VenueDetailsScreen());
+                          // Get.to(VenueDetailsScreen());
                       },
                     ),
                   ),
