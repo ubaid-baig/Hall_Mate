@@ -6,3 +6,4 @@ class ManagerDashboardController extends GetxController {
 
   void changeTab(int index) => currentTab.value = index;
 }
+

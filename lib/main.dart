@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:hall_mate/app/app_theme.dart';
+import 'package:hall_mate/controller/manager/dashboard/manager_nav_controller.dart';
 import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
 import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
 import 'package:hall_mate/view/user/nav_bar_widget.dart';
@@ -25,6 +27,7 @@ Future<void> main() async {
   // Controllers are created once here, every screen then uses Get.find.
   Get.put(AuthController());
   Get.put(NavController());
+  
   final ThemeController themeController = Get.put(ThemeController());
 
   await themeController.loadSavedTheme();
@@ -50,9 +53,10 @@ class Main extends StatelessWidget {
       // home: NavBarWidget(),
       // home:const ManagerDashboardScreen() ,
       // home: const ManagerDashboardReviewScreen(),
-      home: const BallroomDetailsScreen(),
+      // home: const BallroomDetailsScreen(),
       // home: const VenueDetailsScreen(),
       // home: const OutdoorDetailsScreen(),
+      home: const ManagerDashboardScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
