@@ -104,7 +104,9 @@ class ManagerDashboardReviewScreen extends StatelessWidget {
                           title: 'Calendar',
                           subtitle: 'Slots & peak prices',
                           onTap: () {
-                            ManagerNavController.goToTab(2);
+                            if (Get.isRegistered<ManagerNavController>()) {
+                              Get.find<ManagerNavController>().changeIndex(2);
+                            }
                           },
                         ),
                       ),
@@ -118,7 +120,9 @@ class ManagerDashboardReviewScreen extends StatelessWidget {
                       Text('New requests', style: _sectionStyle()),
                       TextButton(
                         onPressed: () {
-                          ManagerNavController.goToTab(1);
+                          if (Get.isRegistered<ManagerNavController>()) {
+                            Get.find<ManagerNavController>().changeIndex(1);
+                          }
                         },
                         child: Text(
                           'See all',
