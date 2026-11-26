@@ -81,21 +81,11 @@ class VenueSearchController extends GetxController {
     },
   ];
 
-  // ══════════════════════════════════════════════════════════
-  // SEARCH TEXT
-  // ══════════════════════════════════════════════════════════
-
-  // What the user typed in the search field. .obs because Obx watches it.
   RxString searchText = ''.obs;
 
-  // Called on every letter typed (onChanged of the TextField).
   void updateSearch(String text) {
     searchText.value = text;
   }
-
-  // ══════════════════════════════════════════════════════════
-  // THE LIST
-  // ══════════════════════════════════════════════════════════
 
   // true if the venue passes ALL the checks
   bool matches(Map<String, dynamic> venue) {

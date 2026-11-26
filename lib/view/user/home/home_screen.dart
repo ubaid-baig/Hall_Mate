@@ -155,9 +155,6 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    // Stack puts widgets on top of each other. The first child
-                    // (the bell button) is the base. Positioned places the orange
-                    // dot, measured from the top and right edge of the Stack.
                     // Obx: the dot disappears when hasNewNotification becomes false
                     Obx(
                           () => Stack(
@@ -227,8 +224,6 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextField(
-                        // readOnly: no keyboard here. A tap opens the Search
-                        // tab, where the real typing happens.
                         readOnly: true,
                         onTap: () {
                           controller.openSearchTab();

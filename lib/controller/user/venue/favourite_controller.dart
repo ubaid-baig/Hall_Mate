@@ -1,22 +1,12 @@
 import 'package:get/get.dart';
 
-// ══════════════════════════════════════════════════════════
-// ONE place for the user's saved venues.
-//
-// It is created ONCE in main.dart (Get.put), and every screen that shows
-// a heart uses the SAME controller with Get.find:
-//   Home, Search, Saved venues and Profile.
-// So a heart tapped on Home shows up in Saved venues straight away.
-//
-// When you connect the API:
 //  - Fill savedVenues from GET /favourites
 //  - In toggleFavourite: POST /favourites/{id} to save,
 //    DELETE /favourites/{id} to unsave.
 //  - Compare venues by 'id' instead of 'name'.
-// ══════════════════════════════════════════════════════════
+
 class FavouriteController extends GetxController {
-  // The saved venues. .obs because Obx on several screens watches it.
-  // ('photo' is DUMMY ONLY, a colour for the placeholder)
+
   RxList<Map<String, dynamic>> savedVenues = <Map<String, dynamic>>[
     {
       'name': 'Shaan Banquet Hall',

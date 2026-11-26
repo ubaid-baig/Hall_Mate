@@ -19,12 +19,6 @@ class HomeController extends GetxController {
   // API: the logged-in user's name (from login response or profile API)
   String userName = 'Ali';
 
-  // ══════════════════════════════════════════════════════════
-  // LOCATION (the row at the top)
-  // ══════════════════════════════════════════════════════════
-
-  // The areas shown in the location bottom sheet.
-  // Later (API): GET /areas
   List<String> areas = [
     'Gulshan-e-Iqbal',
     'Clifton',
@@ -34,58 +28,27 @@ class HomeController extends GetxController {
     'Bahadurabad',
   ];
 
-  // The area the user picked. Obx shows it in the top row, so it is .obs.
-  // API: the user's saved area
+
   RxString selectedArea = 'Gulshan-e-Iqbal'.obs;
 
-  // Called when an area is tapped in the bottom sheet.
-  // Later (API): save it, and load the "Near you" venues for this area.
   void selectArea(String area) {
     selectedArea.value = area;
   }
 
-  // ══════════════════════════════════════════════════════════
-  // NOTIFICATIONS DOT
-  // ══════════════════════════════════════════════════════════
-
-  // true = show the orange dot on the bell. Obx watches it, so it is .obs.
-  // API: true when the user has unread notifications
   RxBool hasNewNotification = true.obs;
 
-  // Called when the bell is tapped: the user has now seen them.
-  // Later (API): mark them as read on the server.
   void markNotificationsSeen() {
     hasNewNotification.value = false;
   }
 
-  // ══════════════════════════════════════════════════════════
-  // SEARCH TAB
-  // ══════════════════════════════════════════════════════════
-
-  // The search field and "See all" open the Search tab (tab number 1).
-  // NavController was created in main.dart, so we find it with Get.find.
   void openSearchTab() {
     Get.find<NavController>().changeIndex(1);
   }
 
-  // The hearts (saved venues) are in FavouriteController, so that Home,
-  // Search, Saved venues and Profile all share ONE list.
-
-  // ══════════════════════════════════════════════════════════
-  // BROWSE BY TYPE
-  // ══════════════════════════════════════════════════════════
-
-  // The three tiles, in order. Each text must match the 'type' of the venues.
   List<String> venueTypes = ['Ballroom', 'Banquet', 'Outdoor'];
 
-  // Which tile is selected: 0 Ballroom, 1 Banquet, 2 Outdoor.
-  // -1 means no tile is selected, so every venue shows.
-  // It is .obs because Obx on the Home screen watches it.
-  // (-1) needs brackets, because -1.obs would mean "minus (1.obs)".
   RxInt selectedTypeIndex = (-1).obs;
 
-  // Called when a tile is tapped.
-  // Tapping the selected tile again removes the filter.
   void selectType(int index) {
     if (selectedTypeIndex.value == index) {
       selectedTypeIndex.value = -1;
@@ -94,10 +57,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // Gives back only the venues of the selected type.
-  // If no tile is selected, it gives back the whole list.
-  // Later (API): the server can do this for you, for example
-  // GET /venues?type=Banquet, and you show what it returns.
   List<Map<String, dynamic>> filterByType(List<Map<String, dynamic>> venues) {
     if (selectedTypeIndex.value == -1) {
       return venues;
@@ -114,7 +73,6 @@ class HomeController extends GetxController {
     return result;
   }
 
-  // The text shown when a type has no venues in a list.
   String emptyText() {
     if (selectedTypeIndex.value == -1) {
       return 'No venues yet';
@@ -122,13 +80,6 @@ class HomeController extends GetxController {
     return 'No ${venueTypes[selectedTypeIndex.value]} venues here yet';
   }
 
-  // ══════════════════════════════════════════════════════════
-  // VENUE LISTS
-  // ══════════════════════════════════════════════════════════
-
-  // API: GET /venues?featured=true
-  // 'photo' is DUMMY ONLY (a colour for the placeholder). With the API,
-  // show the venue's real photo instead.
   List<Map<String, dynamic>> featuredVenues = [
     {
       'name': 'Shaan Banquet Hall',
