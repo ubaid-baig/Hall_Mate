@@ -22,7 +22,16 @@ class MediaGalleryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.bgScreen,
       body: SafeArea(
-        child: Column(
+        // One Obx for the whole screen: the big picture, the counter,
+        // the selected small picture and the tabs all change together.
+        // The two values are read here first, because ListView builds the
+        // small pictures a moment later, outside the Obx.
+        child: Obx(() {
+        final int selected = controller.selectedThumbIndex.value;
+        final int tab = controller.selectedTabIndex.value;
+        final Map<String, String> photo = controller.selectedPhoto();
+
+        return Column(
           children: [
             // ════════ TOP BAR: close, counter, share ════════
             Padding(
@@ -55,7 +64,7 @@ class MediaGalleryScreen extends StatelessWidget {
                       children: [
                         // API: position of the selected photo and the total
                         Text(
-                          controller.counterText,
+                          controller.counterText(),
                           style: AppTextStyles.titleMedium(
                             color: colors.textPrimary,
                           ),
@@ -93,12 +102,12 @@ class MediaGalleryScreen extends StatelessWidget {
             Expanded(
               // API: the selected photo (here only a coloured box)
               child: PhotoPlaceholder(
-                photoStyle: controller.bigPhoto,
+                photoStyle: photo['photo']!,
                 width: double.infinity,
                 height: double.infinity,
                 iconSize: 32,
                 showLabel: true,
-                label: controller.bigLabel,
+                label: photo['label']!,
                 borderRadius: BorderRadius.zero,
               ),
             ),
@@ -116,7 +125,7 @@ class MediaGalleryScreen extends StatelessWidget {
                 children: [
                   // API: the title and uploader of the selected photo
                   Text(
-                    controller.photoTitle,
+                    photo['title']!,
                     style: AppTextStyles.titleMedium(color: colors.textPrimary),
                   ),
                   const SizedBox(height: 4),
@@ -126,7 +135,8 @@ class MediaGalleryScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // ── Small pictures (scroll sideways) ──
+                  // ── Photos tab: small pictures (scroll sideways) ──
+                  if (tab == 0) ...[
                   SizedBox(
                     height: 52,
                     child: ListView.builder(
@@ -134,14 +144,15 @@ class MediaGalleryScreen extends StatelessWidget {
                       // API: one small picture for every photo
                       itemCount: controller.thumbs.length,
                       itemBuilder: (context, index) {
-                        final bool isSelected =
-                            controller.selectedThumbIndex == index;
+                        final bool isSelected = selected == index;
 
                         return Padding(
                           padding: const EdgeInsets.only(right: 10),
                           child: GestureDetector(
-                            // Later: show this photo in the big picture
-                            onTap: () {},
+                            // Shows this photo in the big picture
+                            onTap: () {
+                              controller.selectThumb(index);
+                            },
                             child: Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
@@ -154,7 +165,7 @@ class MediaGalleryScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: PhotoPlaceholder(
-                                photoStyle: controller.thumbs[index],
+                                photoStyle: controller.thumbs[index]['photo']!,
                                 width: 44,
                                 height: 44,
                                 iconSize: 20,
@@ -167,6 +178,7 @@ class MediaGalleryScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
+                  ],
 
                   // ── Tabs: Photos | Videos ──
                   Container(
@@ -180,12 +192,13 @@ class MediaGalleryScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            // Later: show the photos
-                            onTap: () {},
+                            onTap: () {
+                              controller.selectTab(0);
+                            },
                             child: Container(
                               height: 38,
                               decoration: BoxDecoration(
-                                color: controller.selectedTabIndex == 0
+                                color: tab == 0
                                     ? colors.textPrimary
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
@@ -194,7 +207,7 @@ class MediaGalleryScreen extends StatelessWidget {
                                 child: Text(
                                   controller.photosTab,
                                   style: AppTextStyles.titleSmall(
-                                    color: controller.selectedTabIndex == 0
+                                    color: tab == 0
                                         ? colors.bgScreen
                                         : colors.textSecondary,
                                   ),
@@ -205,12 +218,13 @@ class MediaGalleryScreen extends StatelessWidget {
                         ),
                         Expanded(
                           child: GestureDetector(
-                            // Later: show the videos
-                            onTap: () {},
+                            onTap: () {
+                              controller.selectTab(1);
+                            },
                             child: Container(
                               height: 38,
                               decoration: BoxDecoration(
-                                color: controller.selectedTabIndex == 1
+                                color: tab == 1
                                     ? colors.textPrimary
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
@@ -219,7 +233,7 @@ class MediaGalleryScreen extends StatelessWidget {
                                 child: Text(
                                   controller.videosTab,
                                   style: AppTextStyles.titleSmall(
-                                    color: controller.selectedTabIndex == 1
+                                    color: tab == 1
                                         ? colors.bgScreen
                                         : colors.textSecondary,
                                   ),
@@ -231,12 +245,14 @@ class MediaGalleryScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // ── Videos tab: the video row ──
+                  if (tab == 1) ...[
                   const SizedBox(height: 14),
-
-                  // ── Video row ──
                   GestureDetector(
-                    // Later: play the walkthrough video
-                    onTap: () {},
+                    // Later: play the walkthrough video (needs a package)
+                    onTap: () {
+                      Get.snackbar('Video', 'Playing videos will be added later');
+                    },
                     child: Row(
                       children: [
                         Container(
@@ -288,11 +304,13 @@ class MediaGalleryScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  ],
                 ],
               ),
             ),
           ],
-        ),
+        );
+        }),
       ),
     );
   }

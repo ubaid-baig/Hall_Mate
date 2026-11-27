@@ -134,10 +134,6 @@ class ManagerNavBarWidget extends StatelessWidget {
           : const ManagerDashboardReviewScreen(),
       const BookingRequestsScreen(),
       // const AvailabilityCalendarScreen(),
-       const Center(
-    child: Text('Calendar Screen'),
-  ),
-
       ChatScreen(),
       ProfileScreen(),
     ];

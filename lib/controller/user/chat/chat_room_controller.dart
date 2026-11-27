@@ -31,7 +31,8 @@ class ChatRoomController extends GetxController {
   // Text message:  isMine, text, time
   // Image message: isMine, imageLabel, photo ('photo' is DUMMY ONLY, a colour)
   String dateSeparator = 'Today'; // API: group the messages by day
-  List<Map<String, dynamic>> messages = [
+  // .obs because Obx shows the list (a sent message is added to it).
+  RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[
     {
       'isMine': false,
       'text': 'Assalam-o-Alaikum Ali! Thanks for your request for 19 December.',
@@ -57,9 +58,36 @@ class ChatRoomController extends GetxController {
       'text': 'Looks great. Please send 2–3 more options.',
       'time': '10:15 am · Seen',
     },
-  ];
+  ].obs;
 
   // The text the user types at the bottom.
-  // Later: Send reads this text, posts it, then clears it.
   TextEditingController messageController = TextEditingController();
+
+  // Called by the send button (and the keyboard's send key).
+  // Later (API): POST /conversations/{id}/messages first.
+  void sendMessage() {
+    final String text = messageController.text.trim();
+    if (text.isEmpty) {
+      return; // nothing typed, nothing to send
+    }
+    messages.add({
+      'isMine': true,
+      'text': text,
+      'time': timeNow(),
+    });
+    messageController.clear();
+  }
+
+  // The time now as "4:05 pm"
+  // (padLeft(2, '0') turns 5 into "05")
+  String timeNow() {
+    final DateTime now = DateTime.now();
+    int hour = now.hour % 12;
+    if (hour == 0) {
+      hour = 12;
+    }
+    final String minute = now.minute.toString().padLeft(2, '0');
+    final String amPm = now.hour < 12 ? 'am' : 'pm';
+    return '$hour:$minute $amPm';
+  }
 }

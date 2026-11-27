@@ -9,8 +9,8 @@ import '../../../controller/manager/venue_setup/venue_details_controller.dart';
 // If your AppColors already has a warning colour, replace this with it.
 const Color _amber = Color(0xFFE0A24A);
 
-class VenueDetailsScreen extends StatelessWidget {
-  const VenueDetailsScreen({super.key});
+class BanquetDetailsScreen extends StatelessWidget {
+  const BanquetDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

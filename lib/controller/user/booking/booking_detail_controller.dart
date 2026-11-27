@@ -55,7 +55,8 @@ class BookingDetailController extends GetxController {
   //                  (green bubble on the right)
   // 'isMine' false = the offer came from the other side (white bubble on the left)
   // 'tag' is the small pill: 'Countered' on the old one, 'Latest' on the newest.
-  List<Map<String, dynamic>> offers = [
+  // .obs because Obx shows the list (a new counter offer is added to it).
+  RxList<Map<String, dynamic>> offers = <Map<String, dynamic>>[
     {
       'sender': 'You',
       'isMine': true,
@@ -72,29 +73,96 @@ class BookingDetailController extends GetxController {
       'time': 'Tue 17 Nov, 11:02 am',
       'tag': 'Latest',
     },
-  ];
+  ].obs;
 
   // ── Bottom bar ──
   // API: the note under the offers and the amount on the Accept button
-  // (latest offer price x guests)
-  String latestOfferNote = 'Shaan Banquet Hall sent a new offer. It expires in 21 h.';
+  // (latest offer price x guests). .obs because they change after a counter.
+  RxString latestOfferNote =
+      'Shaan Banquet Hall sent a new offer. It expires in 21 h.'.obs;
   String acceptText = 'Accept · Rs 7,80,000';
+
+  // true after you send a counter offer: now the venue has to answer,
+  // so you cannot accept (the Accept button turns grey).
+  RxBool isWaitingForThem = false.obs;
 
   // ── Counter-offer sheet ──
   // API: the other side's latest offer
   String theirLatestOfferText = 'Their latest offer: Rs 2,600 / head';
 
-  // The price field. Dummy text for now.
-  // Later: keep only the number in here (like 2500) and show "Rs" with a prefix,
-  // so we can multiply it by the guests to get the total.
-  TextEditingController priceController = TextEditingController(
-    text: 'Rs 2,500',
-  );
+  // The guests as a number, used for the total
+  int guestsNumber = 300;
 
-  // Later: these two update by themselves when the price field changes
-  // (use an RxString and an Obx in the sheet).
-  String guestsCalcText = '300 guests × Rs 2,500';
-  String totalText = 'Rs 7,50,000';
+  // The price field (only the number)
+  TextEditingController priceController = TextEditingController(text: '2500');
+
+  // The typed price as a number. .obs because the total in the sheet watches it.
+  RxInt counterPrice = 2500.obs;
+
+  // Called on every key typed in the price field.
+  // int.tryParse: "2500" -> 2500, not a number -> null, then we use 0.
+  void updateCounterPrice(String text) {
+    counterPrice.value = int.tryParse(text.replaceAll(',', '')) ?? 0;
+  }
+
+  // "300 guests × Rs 2,500"
+  String guestsCalcText() {
+    return '$guestsNumber guests × ${formatRs(counterPrice.value)}';
+  }
+
+  // "Rs 7,50,000"
+  String totalText() {
+    return formatRs(guestsNumber * counterPrice.value);
+  }
+
+  // Called by "Send counter offer".
+  // Gives back true if it was sent (then the sheet closes).
+  // Later (API): POST /bookings/{id}/offers first.
+  bool sendCounterOffer() {
+    if (counterPrice.value <= 0) {
+      Get.snackbar('Price missing', 'Please enter your price per head');
+      return false;
+    }
+
+    // The old "Latest" offer becomes "Countered"
+    for (var offer in offers) {
+      if (offer['tag'] == 'Latest') {
+        offer['tag'] = 'Countered';
+      }
+    }
+
+    // Add my new offer at the bottom
+    offers.add({
+      'sender': 'You',
+      'isMine': true,
+      'price': formatRs(counterPrice.value),
+      'total': totalText(),
+      'time': 'Just now',
+      'tag': 'Latest',
+    });
+
+    latestOfferNote.value =
+        'You sent a counter offer. Waiting for $venueName to reply.';
+    isWaitingForThem.value = true;
+    return true;
+  }
+
+  // Writes a number the Pakistani way: 750000 -> "Rs 7,50,000"
+  // (the same helper as in BookingRequestController)
+  String formatRs(int amount) {
+    String digits = amount.toString();
+    if (digits.length <= 3) {
+      return 'Rs $digits';
+    }
+    final String last3 = digits.substring(digits.length - 3);
+    String rest = digits.substring(0, digits.length - 3);
+    String groups = '';
+    while (rest.length > 2) {
+      groups = ',${rest.substring(rest.length - 2)}$groups';
+      rest = rest.substring(0, rest.length - 2);
+    }
+    return 'Rs $rest$groups,$last3';
+  }
 
   String expiryNote = 'Unanswered offers expire after 24 hours.';
 }

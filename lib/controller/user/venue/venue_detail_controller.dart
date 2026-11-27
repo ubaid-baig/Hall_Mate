@@ -19,8 +19,8 @@ class VenueDetailController extends GetxController {
   String photoCountText = '1 / 15 photos';
   // API: show the video button only if the venue has a walkthrough video
   String videoText = 'Walkthrough video';
-  // API: is this venue in the user's favourites?
-  bool isFavorite = true;
+  // The heart uses FavouriteController (shared with Home, Search and
+  // Saved venues), so it is not stored here.
 
   // ── Title area ──
   String type = 'Banquet'; // API: Ballroom, Banquet or Outdoor
@@ -30,6 +30,22 @@ class VenueDetailController extends GetxController {
   String location = 'Gulshan-e-Iqbal, Karachi';
   String rating = '4.5';
   String reviewsText = '(86 reviews)';
+
+  // API: area + capacity, shown on the card in Saved venues
+  String cardSubtitle = 'Gulshan-e-Iqbal · up to 500 guests';
+
+  // This venue in the short "card" form, with the same keys as the
+  // venue cards. It is what gets saved when the heart is tapped.
+  Map<String, dynamic> cardData() {
+    return {
+      'name': name,
+      'rating': rating,
+      'subtitle': cardSubtitle,
+      'price': fromPrice,
+      'type': type,
+      'photo': photo,
+    };
+  }
 
   // ── Feature tiles ──
   // API: the main facilities of the venue.
@@ -45,7 +61,7 @@ class VenueDetailController extends GetxController {
       'A family-friendly banquet with in-house catering, a separate family hall and room for up to 500 guests. Ideal for walimas, mehndis and office dinners.';
 
   // ── Packages ──
-  // API: the packages of the venue. 'isPopular' gives the green look and the pill.
+  // API: the packages of the venue. 'isPopular' shows the orange pill.
   String minGuestsText = 'Min. 150 guests';
   List<Map<String, dynamic>> packages = [
     {
@@ -62,12 +78,39 @@ class VenueDetailController extends GetxController {
     },
   ];
 
+  // Which package is selected: 0 Silver, 1 Gold. Gold (popular) at the start.
+  // .obs because Obx watches it (the two cards and the bottom bar).
+  RxInt selectedPackageIndex = 1.obs;
+
+  // Called when a package card is tapped
+  void selectPackage(int index) {
+    selectedPackageIndex.value = index;
+  }
+
+  // Bottom bar: "Gold package" and "Rs 2,800"
+  String selectedPackageLabel() {
+    return '${packages[selectedPackageIndex.value]['name']} package';
+  }
+
+  String selectedPackagePrice() {
+    return packages[selectedPackageIndex.value]['price'];
+  }
+
   // ── Free dates ──
   // API: GET /venues/{id}/availability?month=2026-12
   // 'isLunchFree' / 'isDinnerFree': green bar when free, grey bar when booked.
   String freeDatesTitle = 'Free dates · Dec 2026';
-  // Which day is selected (index in the list below). Later: make it RxInt.
-  int selectedDateIndex = 5;
+  // API: the short month name of the dates below
+  String month = 'Dec';
+
+  // Which day is selected (index in the list below). Sat 19 at the start.
+  // .obs because Obx watches it (the chips and the grey box).
+  RxInt selectedDateIndex = 5.obs;
+
+  // Called when a day is tapped
+  void selectDate(int index) {
+    selectedDateIndex.value = index;
+  }
   List<Map<String, dynamic>> dates = [
     {'day': 'Mon', 'date': '14', 'isLunchFree': true, 'isDinnerFree': true},
     {'day': 'Tue', 'date': '15', 'isLunchFree': true, 'isDinnerFree': false},
@@ -78,11 +121,52 @@ class VenueDetailController extends GetxController {
     {'day': 'Sun', 'date': '20', 'isLunchFree': false, 'isDinnerFree': false},
   ];
 
-  // The grey box under the days: it describes the selected day.
-  // API: build these from the selected day's lunch / dinner status.
-  String selectedDateText = 'Sat 19 Dec';
-  String selectedDateNote = ' · Lunch booked';
-  String selectedDateStatus = 'Dinner free';
+  // ── The grey box under the days: it describes the selected day ──
+
+  // "Sat 19 Dec"
+  String selectedDateText() {
+    final day = dates[selectedDateIndex.value];
+    return '${day['day']} ${day['date']} $month';
+  }
+
+  // The small grey text after the date, for example " · Lunch booked"
+  String selectedDateNote() {
+    final day = dates[selectedDateIndex.value];
+    final bool lunch = day['isLunchFree'];
+    final bool dinner = day['isDinnerFree'];
+
+    if (lunch && dinner) {
+      return ''; // the green text already says both are free
+    } else if (dinner) {
+      return ' · Lunch booked';
+    } else if (lunch) {
+      return ' · Dinner booked';
+    }
+    return ''; // the grey text already says "Fully booked"
+  }
+
+  // The green text on the right, for example "Dinner free"
+  String selectedDateStatus() {
+    final day = dates[selectedDateIndex.value];
+    final bool lunch = day['isLunchFree'];
+    final bool dinner = day['isDinnerFree'];
+
+    if (lunch && dinner) {
+      return 'Lunch & dinner free';
+    } else if (dinner) {
+      return 'Dinner free';
+    } else if (lunch) {
+      return 'Lunch free';
+    }
+    return 'Fully booked';
+  }
+
+  // true if the selected day has at least one free slot
+  // (green dot and text). false = grey dot and text.
+  bool isSelectedDayFree() {
+    final day = dates[selectedDateIndex.value];
+    return day['isLunchFree'] || day['isDinnerFree'];
+  }
 
   // ── Reviews ──
   // API: GET /venues/{id}/reviews  ('rating' is 1 to 5)

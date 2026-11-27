@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 
+import '../../shared/nav_controller.dart';
+
+
 class HomeController extends GetxController {
   // ══════════════════════════════════════════════════════════
   // DUMMY DATA for the Home screen.
@@ -9,26 +12,74 @@ class HomeController extends GetxController {
   //     RxList (.obs) or call update() after loading, so the screen refreshes.
   //  2. Load the data from the API inside onInit() (see the bottom).
   //  3. Every Map below has the same keys as the card needs:
-  //     name, rating, subtitle, price, tag, isFavorite, photo.
+  //     name, rating, subtitle, price, tag, type, photo.
   //     Later you can replace the Map with a VenueModel.
   // ══════════════════════════════════════════════════════════
 
   // API: the logged-in user's name (from login response or profile API)
   String userName = 'Ali';
 
-  // API: the user's saved city / area
-  String location = 'Gulshan-e-Iqbal, Karachi';
+  List<String> areas = [
+    'Gulshan-e-Iqbal',
+    'Clifton',
+    'DHA',
+    'North Nazimabad',
+    'PECHS',
+    'Bahadurabad',
+  ];
 
-  // API: true when the user has unread notifications (shows the orange dot)
-  bool hasNewNotification = true;
 
-  // Which "Browse by type" tile is selected: 0 Ballroom, 1 Banquet, 2 Outdoor.
-  // Later: make it RxInt and change it when a tile is tapped.
-  int selectedTypeIndex = 1;
+  RxString selectedArea = 'Gulshan-e-Iqbal'.obs;
 
-  // API: GET /venues?featured=true
-  // 'photo' is DUMMY ONLY (a colour for the placeholder). With the API,
-  // show the venue's real photo instead.
+  void selectArea(String area) {
+    selectedArea.value = area;
+  }
+
+  RxBool hasNewNotification = true.obs;
+
+  void markNotificationsSeen() {
+    hasNewNotification.value = false;
+  }
+
+  void openSearchTab() {
+    Get.find<NavController>().changeIndex(1);
+  }
+
+  List<String> venueTypes = ['Ballroom', 'Banquet', 'Outdoor'];
+
+  RxInt selectedTypeIndex = (-1).obs;
+
+  void selectType(int index) {
+    if (selectedTypeIndex.value == index) {
+      selectedTypeIndex.value = -1;
+    } else {
+      selectedTypeIndex.value = index;
+    }
+  }
+
+  List<Map<String, dynamic>> filterByType(List<Map<String, dynamic>> venues) {
+    if (selectedTypeIndex.value == -1) {
+      return venues;
+    }
+
+    final String selectedType = venueTypes[selectedTypeIndex.value];
+    List<Map<String, dynamic>> result = [];
+
+    for (var venue in venues) {
+      if (venue['type'] == selectedType) {
+        result.add(venue);
+      }
+    }
+    return result;
+  }
+
+  String emptyText() {
+    if (selectedTypeIndex.value == -1) {
+      return 'No venues yet';
+    }
+    return 'No ${venueTypes[selectedTypeIndex.value]} venues here yet';
+  }
+
   List<Map<String, dynamic>> featuredVenues = [
     {
       'name': 'Shaan Banquet Hall',
@@ -36,18 +87,27 @@ class HomeController extends GetxController {
       'subtitle': 'Gulshan-e-Iqbal · up to 500 guests',
       'price': 'Rs 2,200',
       'tag': 'Banquet',
-      'isFavorite': true,
+      'type': 'Banquet',
       'photo': 'emerald',
     },
     {
-      // Rating, guests and price confirmed by the Saved venues design.
       'name': 'Noor Ballroom',
       'rating': '4.7',
       'subtitle': 'Clifton · up to 350 guests',
       'price': 'Rs 3,100',
       'tag': 'Ballroom',
-      'isFavorite': false,
+      'type': 'Ballroom',
       'photo': 'marigold',
+    },
+    {
+      // DUMMY: added so every type has a featured venue to test with
+      'name': 'Seaside Garden Lawn',
+      'rating': '4.2',
+      'subtitle': 'DHA Phase 8 · up to 1,000 guests',
+      'price': 'Rs 1,600',
+      'tag': 'Outdoor',
+      'type': 'Outdoor',
+      'photo': 'slate',
     },
   ];
 
@@ -58,6 +118,7 @@ class HomeController extends GetxController {
       'rating': '4.3',
       'subtitle': 'Outdoor · 1.4 km · up to 800 guests',
       'price': 'Rs 1,800',
+      'type': 'Outdoor',
       'photo': 'slate',
     },
     {
@@ -65,13 +126,23 @@ class HomeController extends GetxController {
       'rating': '4.4',
       'subtitle': 'Banquet · 2.6 km · up to 400 guests',
       'price': 'Rs 2,000',
+      'type': 'Banquet',
       'photo': 'emerald',
+    },
+    {
+      // DUMMY: added so every type has a nearby venue to test with
+      'name': 'Crystal Ballroom',
+      'rating': '4.6',
+      'subtitle': 'Ballroom · 3.2 km · up to 300 guests',
+      'price': 'Rs 2,800',
+      'type': 'Ballroom',
+      'photo': 'marigold',
     },
   ];
 
-  // @override
-  // void onInit() {
-  //   // API: call your functions here, for example getFeaturedVenues();
-  //   super.onInit();
-  // }
+// @override
+// void onInit() {
+//   // API: call your functions here, for example getFeaturedVenues();
+//   super.onInit();
+// }
 }

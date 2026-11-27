@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/user/venue/venue_detail_controller.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 import 'package:hall_mate/view/user/booking/booking_request_screen.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
 import 'package:hall_mate/widgets/user/venue/date_chip.dart';
@@ -20,6 +21,8 @@ class VenueDetailScreen extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
     final VenueDetailController controller = Get.put(VenueDetailController());
+    // The saved venues (hearts). Created once in main.dart.
+    final FavouriteController favController = Get.find<FavouriteController>();
 
     final double dateWidth = (sw * 0.9 - 36) / 7;
 
@@ -88,27 +91,37 @@ class VenueDetailScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 10),
-                                  GestureDetector(
-                                    // Later: add or remove this venue from favourites
-                                    onTap: () {},
-                                    child: Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: colors.bgSurface,
-                                        shape: BoxShape.circle,
+                                  // The heart: save or unsave this venue.
+                                  // Obx: it turns red / empty straight away.
+                                  Obx(() {
+                                    final bool isSaved =
+                                        favController.isSaved(controller.name);
+
+                                    return GestureDetector(
+                                      onTap: () {
+                                        favController.toggleFavourite(
+                                          controller.cardData(),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: colors.bgSurface,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          isSaved
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          size: 22,
+                                          color: isSaved
+                                              ? colors.iconHeart
+                                              : colors.textPrimary,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        controller.isFavorite
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        size: 22,
-                                        color: controller.isFavorite
-                                            ? colors.iconHeart
-                                            : colors.textPrimary,
-                                      ),
-                                    ),
-                                  ),
+                                    );
+                                  }),
                                 ],
                               ),
                             ],
@@ -369,27 +382,45 @@ class VenueDetailScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          Row(
+                          // Tap a package to select it (green look).
+                          // Obx: the green look moves when the other card is tapped.
+                          Obx(
+                            () => Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: PackageCard(
-                                  name: controller.packages[0]['name'],
-                                  price: controller.packages[0]['price'],
-                                  features: controller.packages[0]['features'],
-                                  isPopular: controller.packages[0]['isPopular'],
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectPackage(0);
+                                  },
+                                  child: PackageCard(
+                                    name: controller.packages[0]['name'],
+                                    price: controller.packages[0]['price'],
+                                    features: controller.packages[0]['features'],
+                                    isPopular: controller.packages[0]['isPopular'],
+                                    isSelected:
+                                        controller.selectedPackageIndex.value == 0,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: PackageCard(
-                                  name: controller.packages[1]['name'],
-                                  price: controller.packages[1]['price'],
-                                  features: controller.packages[1]['features'],
-                                  isPopular: controller.packages[1]['isPopular'],
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectPackage(1);
+                                  },
+                                  child: PackageCard(
+                                    name: controller.packages[1]['name'],
+                                    price: controller.packages[1]['price'],
+                                    features: controller.packages[1]['features'],
+                                    isPopular: controller.packages[1]['isPopular'],
+                                    isSelected:
+                                        controller.selectedPackageIndex.value == 1,
+                                  ),
                                 ),
                               ),
                             ],
+                          ),
                           ),
                           SizedBox(height: sh * 0.028),
 
@@ -413,7 +444,13 @@ class VenueDetailScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(
+                          // Obx: the green day moves when another day is tapped.
+                          // The value is read here first, because ListView builds
+                          // the days a moment later, outside the Obx.
+                          Obx(() {
+                          final int selected = controller.selectedDateIndex.value;
+
+                          return SizedBox(
                             height: 72,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
@@ -424,7 +461,9 @@ class VenueDetailScreen extends StatelessWidget {
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 6),
                                   child: GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      controller.selectDate(index);
+                                    },
                                     child: SizedBox(
                                       width: dateWidth,
                                       child: DateChip(
@@ -432,19 +471,21 @@ class VenueDetailScreen extends StatelessWidget {
                                         date: day['date'],
                                         isLunchFree: day['isLunchFree'],
                                         isDinnerFree: day['isDinnerFree'],
-                                        isSelected:
-                                            controller.selectedDateIndex == index,
+                                        isSelected: selected == index,
                                       ),
                                     ),
                                   ),
                                 );
                               },
                             ),
-                          ),
+                          );
+                          }),
                           const SizedBox(height: 12),
 
-                          // The grey box about the selected day
-                          Container(
+                          // The grey box about the selected day.
+                          // Obx: its text changes when another day is tapped.
+                          Obx(
+                            () => Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
@@ -457,15 +498,18 @@ class VenueDetailScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                RichText(
+                                // Expanded: a long text wraps instead of
+                                // pushing the status off the screen
+                                Expanded(
+                                child: RichText(
                                   text: TextSpan(
                                     style: AppTextStyles.titleSmall(
                                       color: colors.textPrimary,
                                     ),
                                     children: [
-                                      TextSpan(text: controller.selectedDateText),
+                                      TextSpan(text: controller.selectedDateText()),
                                       TextSpan(
-                                        text: controller.selectedDateNote,
+                                        text: controller.selectedDateNote(),
                                         style: AppTextStyles.bodySmall(
                                           color: colors.textMuted,
                                         ),
@@ -473,27 +517,35 @@ class VenueDetailScreen extends StatelessWidget {
                                     ],
                                   ),
                                 ),
+                                ),
+                                const SizedBox(width: 8),
                                 Row(
                                   children: [
                                     Container(
                                       width: 8,
                                       height: 8,
                                       decoration: BoxDecoration(
-                                        color: colors.success,
+                                        // green when a slot is free, grey when not
+                                        color: controller.isSelectedDayFree()
+                                            ? colors.success
+                                            : colors.borderStrong,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      controller.selectedDateStatus,
+                                      controller.selectedDateStatus(),
                                       style: AppTextStyles.titleSmall(
-                                        color: colors.primaryInk,
+                                        color: controller.isSelectedDayFree()
+                                            ? colors.primaryInk
+                                            : colors.textMuted,
                                       ),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
+                          ),
                           ),
                           const SizedBox(height: 10),
 
@@ -592,11 +644,14 @@ class VenueDetailScreen extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          // Obx: the package and price change when a package is tapped
+                          Obx(
+                            () => Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'From',
+                                // "Gold package" (changes when a package is tapped)
+                                controller.selectedPackageLabel(),
                                 style: AppTextStyles.caption(
                                   color: colors.textMuted,
                                 ),
@@ -607,8 +662,10 @@ class VenueDetailScreen extends StatelessWidget {
                                     color: colors.textPrimary,
                                   ),
                                   children: [
-                                    // API: the lowest package price
-                                    TextSpan(text: controller.fromPrice),
+                                    // The price of the selected package
+                                    TextSpan(
+                                      text: controller.selectedPackagePrice(),
+                                    ),
                                     TextSpan(
                                       text: ' / head',
                                       style: AppTextStyles.bodySmall(
@@ -619,6 +676,7 @@ class VenueDetailScreen extends StatelessWidget {
                                 ),
                               ),
                             ],
+                          ),
                           ),
                           SizedBox(
                             width: sw * 0.46,

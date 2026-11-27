@@ -138,14 +138,28 @@ class BookingRequestScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  controller.eventDateText,
-                                  style: AppTextStyles.titleSmall(),
+                                // Obx: the text changes after a new date is picked
+                                child: Obx(
+                                  () => Text(
+                                    controller.eventDateText(),
+                                    style: AppTextStyles.titleSmall(),
+                                  ),
                                 ),
                               ),
                               TextButton(
-                                // Later: showDatePicker, then update the date
-                                onPressed: () {},
+                                // Opens the date picker (like in the to-do app).
+                                // If a date is picked, it is sent to the controller.
+                                onPressed: () async {
+                                  DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: controller.eventDate.value,
+                                    firstDate: DateTime(2026),
+                                    lastDate: DateTime(2028),
+                                  );
+                                  if (picked != null) {
+                                    controller.changeDate(picked);
+                                  }
+                                },
                                 child: Text(
                                   'Change',
                                   style: AppTextStyles.titleSmall(
@@ -161,33 +175,42 @@ class BookingRequestScreen extends StatelessWidget {
                         // ── Time slot ──
                         Text('Time slot', style: AppTextStyles.titleLarge()),
                         const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                // Later: select this slot (only if it is available)
-                                onTap: () {},
-                                child: SlotCard(
-                                  label: controller.slots[0]['label'],
-                                  note: controller.slots[0]['note'],
-                                  isAvailable: controller.slots[0]['isAvailable'],
-                                  isSelected: controller.selectedSlotIndex == 0,
+                        // Obx: the green slot moves when the other one is tapped.
+                        // (A booked slot cannot be selected, see selectSlot.)
+                        Obx(
+                          () => Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectSlot(0);
+                                  },
+                                  child: SlotCard(
+                                    label: controller.slots[0]['label'],
+                                    note: controller.slots[0]['note'],
+                                    isAvailable: controller.slots[0]['isAvailable'],
+                                    isSelected:
+                                        controller.selectedSlotIndex.value == 0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: SlotCard(
-                                  label: controller.slots[1]['label'],
-                                  note: controller.slots[1]['note'],
-                                  isAvailable: controller.slots[1]['isAvailable'],
-                                  isSelected: controller.selectedSlotIndex == 1,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectSlot(1);
+                                  },
+                                  child: SlotCard(
+                                    label: controller.slots[1]['label'],
+                                    note: controller.slots[1]['note'],
+                                    isAvailable: controller.slots[1]['isAvailable'],
+                                    isSelected:
+                                        controller.selectedSlotIndex.value == 1,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         SizedBox(height: sh * 0.025),
 
@@ -218,8 +241,10 @@ class BookingRequestScreen extends StatelessWidget {
                               child: Row(
                                 children: [
                                   GestureDetector(
-                                    // Later: guests goes down by 10
-                                    onTap: () {},
+                                    // 10 guests fewer
+                                    onTap: () {
+                                      controller.removeGuests();
+                                    },
                                     child: SizedBox(
                                       width: 44,
                                       height: 44,
@@ -233,15 +258,20 @@ class BookingRequestScreen extends StatelessWidget {
                                   SizedBox(
                                     width: 56,
                                     child: Center(
-                                      child: Text(
-                                        controller.guestsText,
-                                        style: AppTextStyles.titleLarge(),
+                                      // Obx: the number changes on - and +
+                                      child: Obx(
+                                        () => Text(
+                                          '${controller.guests.value}',
+                                          style: AppTextStyles.titleLarge(),
+                                        ),
                                       ),
                                     ),
                                   ),
                                   GestureDetector(
-                                    // Later: guests goes up by 10
-                                    onTap: () {},
+                                    // 10 guests more
+                                    onTap: () {
+                                      controller.addGuests();
+                                    },
                                     child: Container(
                                       width: 44,
                                       height: 44,
@@ -266,31 +296,39 @@ class BookingRequestScreen extends StatelessWidget {
                         // ── Package ──
                         Text('Package', style: AppTextStyles.titleLarge()),
                         const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                // Later: select this package
-                                onTap: () {},
-                                child: PackageSelectCard(
-                                  name: controller.packages[0]['name']!,
-                                  price: controller.packages[0]['price']!,
-                                  isSelected: controller.selectedPackageIndex == 0,
+                        // Obx: the selected package moves when the other is tapped
+                        Obx(
+                          () => Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectPackage(0);
+                                  },
+                                  child: PackageSelectCard(
+                                    name: controller.packages[0]['name'],
+                                    price: controller.packages[0]['price'],
+                                    isSelected:
+                                        controller.selectedPackageIndex.value == 0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: PackageSelectCard(
-                                  name: controller.packages[1]['name']!,
-                                  price: controller.packages[1]['price']!,
-                                  isSelected: controller.selectedPackageIndex == 1,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.selectPackage(1);
+                                  },
+                                  child: PackageSelectCard(
+                                    name: controller.packages[1]['name'],
+                                    price: controller.packages[1]['price'],
+                                    isSelected:
+                                        controller.selectedPackageIndex.value == 1,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         SizedBox(height: sh * 0.025),
 
@@ -323,6 +361,11 @@ class BookingRequestScreen extends StatelessWidget {
                                 child: TextField(
                                   controller: controller.priceController,
                                   keyboardType: TextInputType.number,
+                                  // Every key typed updates the offer, and the
+                                  // totals below change straight away.
+                                  onChanged: (text) {
+                                    controller.updateOffer(text);
+                                  },
                                   style: AppTextStyles.h2(),
                                   decoration: InputDecoration(
                                     contentPadding: const EdgeInsets.symmetric(
@@ -354,11 +397,13 @@ class BookingRequestScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // Later: calculated from the offer and the listed price
-                        Text(
-                          controller.belowListedText,
-                          style: AppTextStyles.bodySmall(
-                            color: colors.accentStrongInk,
+                        // Obx: changes with the offer and the package
+                        Obx(
+                          () => Text(
+                            controller.compareText(),
+                            style: AppTextStyles.bodySmall(
+                              color: colors.accentStrongInk,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -377,15 +422,20 @@ class BookingRequestScreen extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    controller.guestsCalcText,
-                                    style: AppTextStyles.bodyMedium(
-                                      color: colors.textMuted,
+                                  // Obx: these change with guests and offer
+                                  Obx(
+                                    () => Text(
+                                      controller.guestsCalcText(),
+                                      style: AppTextStyles.bodyMedium(
+                                        color: colors.textMuted,
+                                      ),
                                     ),
                                   ),
-                                  Text(
-                                    controller.totalText,
-                                    style: AppTextStyles.titleMedium(),
+                                  Obx(
+                                    () => Text(
+                                      controller.formatRs(controller.total()),
+                                      style: AppTextStyles.titleMedium(),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -399,9 +449,11 @@ class BookingRequestScreen extends StatelessWidget {
                                       color: colors.textMuted,
                                     ),
                                   ),
-                                  Text(
-                                    controller.advanceText,
-                                    style: AppTextStyles.titleMedium(),
+                                  Obx(
+                                    () => Text(
+                                      controller.formatRs(controller.advance()),
+                                      style: AppTextStyles.titleMedium(),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -460,10 +512,12 @@ class BookingRequestScreen extends StatelessWidget {
                                 color: colors.textMuted,
                               ),
                             ),
-                            // Later: the same total as in the summary card
-                            Text(
-                              controller.totalOfferText,
-                              style: AppTextStyles.h2(),
+                            // Obx: the same total as in the summary card
+                            Obx(
+                              () => Text(
+                                controller.formatRs(controller.total()),
+                                style: AppTextStyles.h2(),
+                              ),
                             ),
                           ],
                         ),
@@ -476,9 +530,11 @@ class BookingRequestScreen extends StatelessWidget {
                             bgColor: colors.primary,
                             borderColor: colors.primary,
                             textColor: colors.textOnPrimary,
-                            // Later: POST /bookings, then show a snackbar
-                            // ("Request sent") and go to My bookings.
-                            onTap: () {},
+                            // Checks the offer, goes back and shows "Request sent".
+                            // Later (API): POST /bookings first.
+                            onTap: () {
+                              controller.sendRequest();
+                            },
                           ),
                         ),
                       ],

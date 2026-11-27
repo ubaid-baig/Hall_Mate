@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import 'package:hall_mate/view/user/venue/venue_details_screen.dart';
-import 'package:hall_mate/widgets/common/photo_placeholder.dart';
+
+import '../../../view/user/venue/venue_details_screen.dart';
+import '../../common/photo_placeholder.dart';
+
 
 /// The big venue card: photo on top (with a tag and a heart), details below.
 /// Used in "Featured venues" (Home) and in the Search results list.
@@ -18,6 +20,8 @@ class VenueCard extends StatelessWidget {
   final bool isFavorite; // API: is this venue in the user's favourites?
   final String photoStyle; // DUMMY ONLY: placeholder colour
   final double photoHeight;
+  // Runs when the heart is tapped. Optional, so screens that don't pass it still work.
+  final VoidCallback? onFavoriteTap;
 
   const VenueCard({
     super.key,
@@ -29,6 +33,7 @@ class VenueCard extends StatelessWidget {
     required this.isFavorite,
     required this.photoStyle,
     this.photoHeight = 150,
+    this.onFavoriteTap,
   });
 
   @override
@@ -80,9 +85,11 @@ class VenueCard extends StatelessWidget {
                       style: AppTextStyles.labelSmall(color: colors.primaryInk),
                     ),
                   ),
-                  // Later: tap to add/remove favourite (API: POST /favourites)
+                  // The heart: the screen decides what a tap does.
+                  // (This GestureDetector is inside the card's one, so a tap on
+                  // the heart runs this, not "open Venue detail".)
                   GestureDetector(
-                    onTap: () {},
+                    onTap: onFavoriteTap,
                     child: Container(
                       width: 38,
                       height: 38,

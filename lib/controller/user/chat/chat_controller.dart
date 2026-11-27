@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/view/user/chat/chat_room_screen.dart';
 
 class ChatController extends GetxController {
   // ══════════════════════════════════════════════════════════
@@ -11,7 +12,8 @@ class ChatController extends GetxController {
   //    emerald, marigold, slate or primary.
   //    With the API, take the initials from the name.
   // ══════════════════════════════════════════════════════════
-  List<Map<String, dynamic>> conversations = [
+  // .obs because Obx shows the list (the unread badge goes away on open).
+  RxList<Map<String, dynamic>> conversations = <Map<String, dynamic>>[
     {
       'initials': 'SB',
       'name': 'Shaan Banquet Hall',
@@ -52,5 +54,37 @@ class ChatController extends GetxController {
       'unreadCount': 0,
       'avatar': 'primary',
     },
-  ];
+  ].obs;
+
+  // ── Search ──
+  RxString searchText = ''.obs;
+
+  void updateSearch(String text) {
+    searchText.value = text;
+  }
+
+  // The conversations whose name contains the typed text
+  List<Map<String, dynamic>> filteredConversations() {
+    final String typed = searchText.value.trim().toLowerCase();
+    if (typed.isEmpty) {
+      return conversations;
+    }
+    List<Map<String, dynamic>> result = [];
+    for (var chat in conversations) {
+      final String name = chat['name'].toLowerCase();
+      if (name.contains(typed)) {
+        result.add(chat);
+      }
+    }
+    return result;
+  }
+
+  // Called when a conversation is tapped:
+  // its unread number goes to 0, then the Chat room opens.
+  // Later (API): send this conversation's id to the Chat room.
+  void openChat(Map<String, dynamic> chat) {
+    chat['unreadCount'] = 0;
+    conversations.refresh(); // tells Obx that something inside changed
+    Get.to(() => const ChatRoomScreen());
+  }
 }

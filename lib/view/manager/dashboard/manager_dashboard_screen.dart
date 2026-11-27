@@ -8,7 +8,7 @@ import 'package:hall_mate/view/manager/earnings_screen.dart';
 import 'package:hall_mate/view/manager/media_manager_screen.dart';
 import 'package:hall_mate/view/manager/packages_pricing.dart';
 import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
-import 'package:hall_mate/view/manager/venue_setup/banquet_detail_screen.dart';
+import 'package:hall_mate/view/manager/venue_setup/banquet_details_screen.dart';
 import 'package:hall_mate/view/manager/booking_requests.dart';
 
 
@@ -620,7 +620,7 @@ class ManagerDashboardScreen extends StatelessWidget {
                       title: 'Venue details',
                       subtitle: 'Banquet form',
                       onTap: () {
-                        Get.to(() => const VenueDetailsScreen());
+                        Get.to(() => const BanquetDetailsScreen());
                       },
                     ),
                   ),

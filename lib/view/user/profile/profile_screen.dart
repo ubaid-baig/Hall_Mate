@@ -6,19 +6,22 @@ import 'package:hall_mate/controller/user/profile/profile_controller.dart';
 import 'package:hall_mate/controller/shared/theme_controller.dart';
 import 'package:hall_mate/widgets/user/profile/profile_row.dart';
 import 'package:hall_mate/view/user/venue/favourite_screen.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 
 // This is the "Profile & settings" tab.
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
+  final ProfileController controller = Get.put(ProfileController());
+  // Already created in main.dart
+  final ThemeController themeController = Get.find<ThemeController>();
+  // The saved venues. Created once in main.dart.
+  final FavouriteController favController = Get.find<FavouriteController>();
 
   @override
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
-    final ProfileController controller = Get.put(ProfileController());
-    // Already created in main.dart
-    final ThemeController themeController = Get.find<ThemeController>();
 
     return Scaffold(
       backgroundColor: colors.bgScreen,
@@ -48,14 +51,23 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 36,
-                        backgroundColor: colors.photoMarigold,
-                        child: Text(
-                          // API: first letters of the user's name
-                          controller.initials,
-                          style: AppTextStyles.titleLarge(
-                            color: colors.photoMarigoldInk,
+                      // Obx: shows the photo once one is taken
+                      Obx(
+                            () => controller.pickedImage.value != null
+                            ? CircleAvatar(
+                          radius: 36,
+                          backgroundImage:
+                          FileImage(controller.pickedImage.value!),
+                        )
+                            : CircleAvatar(
+                          radius: 36,
+                          backgroundColor: colors.photoMarigold,
+                          child: Text(
+                            // API: first letters of the user's name
+                            controller.initials,
+                            style: AppTextStyles.titleLarge(
+                              color: colors.photoMarigoldInk,
+                            ),
                           ),
                         ),
                       ),
@@ -101,8 +113,8 @@ class ProfileScreen extends StatelessWidget {
                       SizedBox(
                         height: 44,
                         child: ElevatedButton(
-                          // Later: open the Edit profile screen
-                          onPressed: () {},
+                          // Opens the camera to take a new photo
+                          onPressed: controller.openCamera,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.bgSurface,
                             foregroundColor: colors.textPrimary,
@@ -166,16 +178,18 @@ class ProfileScreen extends StatelessWidget {
                         // API: the saved card
                         subtitle: 'Card ending ${controller.cardEnding}',
                       ),
-                      ProfileRow(
-                        icon: Icons.favorite_border_rounded,
-                        title: 'Saved venues',
-                        // API: number of favourite venues
-                        subtitle: '${controller.savedVenuesCount} venues',
-                        showDivider: false,
-                        // Opens the Saved venues screen
-                        onTap: () {
-                          Get.to(() => const FavouriteScreen());
-                        },
+                      // Obx: the number changes when a heart is tapped anywhere
+                      Obx(
+                            () => ProfileRow(
+                          icon: Icons.favorite_border_rounded,
+                          title: 'Saved venues',
+                          subtitle: favController.countText(),
+                          showDivider: false,
+                          // Opens the Saved venues screen
+                          onTap: () {
+                            Get.to(() => const FavouriteScreen());
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -203,7 +217,7 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Notifications',
                         subtitle: 'Offers, messages and reminders',
                         trailing: Obx(
-                          () => Switch(
+                              () => Switch(
                             value: controller.isNotificationsOn.value,
                             onChanged: controller.toggleNotifications,
                           ),
@@ -215,7 +229,7 @@ class ProfileScreen extends StatelessWidget {
                         title: 'Dark mode',
                         subtitle: 'Switch between light and dark',
                         trailing: Obx(
-                          () => Switch(
+                              () => Switch(
                             value: themeController.isDarkMode.value,
                             onChanged: themeController.toggleTheme,
                           ),
@@ -269,12 +283,15 @@ class ProfileScreen extends StatelessWidget {
                     border: Border.all(color: colors.border),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: const ProfileRow(
+                  child: ProfileRow(
                     icon: Icons.logout_rounded,
                     title: 'Log out',
                     isDanger: true,
                     showDivider: false,
-                    // Later: clear the saved token and go to the Login screen
+                    // Goes back to the Login screen
+                    onTap: () {
+                      controller.logOut();
+                    },
                   ),
                 ),
               ],

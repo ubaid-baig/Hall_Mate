@@ -12,6 +12,7 @@ class NotificationsScreen extends StatelessWidget {
   // One section: a small title (TODAY ...) and one white card with its rows.
   Widget _buildSection(
     AppColors colors,
+    NotificationsController controller,
     String title,
     List<Map<String, dynamic>> items,
   ) {
@@ -36,14 +37,20 @@ class NotificationsScreen extends StatelessWidget {
           child: Column(
             // API: one row for every notification of that day
             children: items.map((item) {
-              return NotificationTile(
-                iconType: item['iconType'],
-                title: item['title'],
-                message: item['message'],
-                time: item['time'],
-                isUnread: item['isUnread'],
-                // no line under the last row
-                showDivider: item != items.last,
+              // Tap: marks it read and opens its screen
+              return GestureDetector(
+                onTap: () {
+                  controller.openNotification(item);
+                },
+                child: NotificationTile(
+                  iconType: item['iconType'],
+                  title: item['title'],
+                  message: item['message'],
+                  time: item['time'],
+                  isUnread: item['isUnread'],
+                  // no line under the last row
+                  showDivider: item != items.last,
+                ),
               );
             }).toList(),
           ),
@@ -91,17 +98,21 @@ class NotificationsScreen extends StatelessWidget {
                       children: [
                         Text('Notifications', style: AppTextStyles.h3()),
                         const SizedBox(height: 2),
-                        // API: how many notifications are not read yet
-                        Text(
-                          controller.unreadText,
-                          style: AppTextStyles.caption(color: colors.textMuted),
+                        // Obx: the number goes down when notifications are read
+                        Obx(
+                          () => Text(
+                            controller.unreadText(),
+                            style: AppTextStyles.caption(color: colors.textMuted),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   GestureDetector(
-                    // Later: mark all notifications as read
-                    onTap: () {},
+                    // Mark all as read
+                    onTap: () {
+                      controller.markAllRead();
+                    },
                     child: Container(
                       width: 44,
                       height: 44,
@@ -137,9 +148,32 @@ class NotificationsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSection(colors, 'TODAY', controller.today),
-                        _buildSection(colors, 'YESTERDAY', controller.yesterday),
-                        _buildSection(colors, 'EARLIER', controller.earlier),
+                        // Obx: the green dots change when notifications are read
+                        Obx(
+                          () => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSection(
+                                colors,
+                                controller,
+                                'TODAY',
+                                controller.today,
+                              ),
+                              _buildSection(
+                                colors,
+                                controller,
+                                'YESTERDAY',
+                                controller.yesterday,
+                              ),
+                              _buildSection(
+                                colors,
+                                controller,
+                                'EARLIER',
+                                controller.earlier,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

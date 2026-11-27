@@ -32,7 +32,7 @@ class SignUpScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () {Get.off(LoginScreen());},
+                  onTap: () {Get.back();},
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -557,7 +557,7 @@ class SignUpScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: (){Get.off(LoginScreen());},
+                      onPressed: (){Get.back();},
                       child: Text(
                         'Log in',
                         style: AppTextStyles.titleSmall(

@@ -5,6 +5,7 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/view/auth/forgot_password_screen.dart';
 import 'package:hall_mate/view/auth/sign_up_screen.dart';
+import 'package:hall_mate/view/user/nav_bar_widget.dart';
 import '../../controller/shared/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -143,11 +144,14 @@ class LoginScreen extends StatelessWidget {
                                 SizedBox(
                                   width: 24,
                                   height: 24,
-                                  child: Checkbox(
-                                    value: false,
+                                  child: Obx(()=>Checkbox(
+                                    value: controller.isCheck.value,
                                     activeColor: colors.primary,
-                                    onChanged: (value) {},
-                                  ),
+                                    onChanged: (value){
+                                      controller.rememberMe();
+                                    },
+                                    ),
+                                  )
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
@@ -179,7 +183,7 @@ class LoginScreen extends StatelessWidget {
                         width: double.infinity,
                         height: (sh * 0.065).clamp(48.0, 58.0),
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {Get.to(NavBarWidget());},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primary,
                             foregroundColor: colors.textOnPrimary,
