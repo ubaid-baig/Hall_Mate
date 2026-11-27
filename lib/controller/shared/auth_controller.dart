@@ -46,7 +46,7 @@ class AuthController extends GetxController {
 
   Future<void> splashLoader() async {
     await Future.delayed(Duration(seconds: 3));
-    Get.offAll(LoginScreen());
+    // Get.offAll(LoginScreen());
   }
 
 }
