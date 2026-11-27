@@ -109,6 +109,33 @@ import 'package:hall_mate/view/user/profile/profile_screen.dart';
 
 /// The frame of the manager app: the 5 screens + the bottom bar.
 /// Open it after a manager logs in:  Get.offAll(() => const ManagerNavBarWidget());
+
+
+
+class CalendarTestScreen extends StatelessWidget {
+  const CalendarTestScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'Calendar Screen Coming Soon',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
 class ManagerNavBarWidget extends StatelessWidget {
   const ManagerNavBarWidget({super.key, this.venueApproved = true});
 
@@ -134,6 +161,7 @@ class ManagerNavBarWidget extends StatelessWidget {
           : const ManagerDashboardReviewScreen(),
       const BookingRequestsScreen(),
       // const AvailabilityCalendarScreen(),
+const CalendarTestScreen(),
       ChatScreen(),
       ProfileScreen(),
     ];

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/app/app_theme.dart';
 import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 import 'package:get/get.dart';
+import 'package:hall_mate/view/manager/dashboard/manager_dashboard_screen.dart';
 import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
+import 'package:hall_mate/widgets/manager/manager_navbar_widget.dart';
 import 'controller/shared/auth_controller.dart';
 import 'controller/shared/nav_controller.dart';
 import 'controller/shared/theme_controller.dart';
@@ -37,8 +39,9 @@ class Main extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeController.themeMode,
       // home: SplashScreen(),
-      home: const BallroomDetailsScreen(),
-
+      // home: ManagerDashboardScreen()
+      // ab yha per navbar kholen
+home: ManagerNavBarWidget(),
 
       debugShowCheckedModeBanner: false,
     );
