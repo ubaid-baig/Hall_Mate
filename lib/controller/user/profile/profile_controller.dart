@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:hall_mate/view/auth/login_screen.dart';
 import 'package:hall_mate/controller/shared/nav_controller.dart';
 import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
+
 
 class ProfileController extends GetxController {
   // ══════════════════════════════════════════════════════════
