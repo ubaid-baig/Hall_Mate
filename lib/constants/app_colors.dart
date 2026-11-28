@@ -1,14 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Color palette for the app. It has TWO sets of the same names:
-/// `AppColors.light` and `AppColors.dark`.
-///
-/// Usage inside any screen:
-///   final colors = AppColors.of(context);
-///   ... color: colors.primary, colors.textMuted, etc.
-///
-/// `AppColors.of(context)` looks at the current theme and gives back the
-/// light set or the dark set, so a screen never has to ask "is it dark?".
 class AppColors {
   // ── Primary ────────────────────────────────────────────────
   final Color primary;

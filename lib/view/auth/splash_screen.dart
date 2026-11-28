@@ -56,7 +56,7 @@ class SplashScreen extends StatelessWidget {
                   minHeight: 3,
                   borderRadius: BorderRadius.circular(4),
                   color: colors.accent,
-                  backgroundColor: colors.textOnPrimary.withOpacity(0.2),
+                  backgroundColor: colors.textOnPrimary.withValues(alpha: 0.2),
                 ),
               ),
               SizedBox(height: sh * 0.015),

@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// One row of the payment methods list (card, JazzCash ...).
-/// The selected row has a light green background, a green icon box
-/// and a filled round radio button.
-///
-/// isFirst / isLast round the row's corners, so the green background
-/// follows the rounded corners of the card around the list.
-///
-/// API: iconType, title and subtitle come from the payment methods list.
 class PaymentMethodTile extends StatelessWidget {
-  final String iconType; // 'card', 'wallet' or 'bank'
-  final String title; // for example 'JazzCash'
-  final String subtitle; // for example 'Mobile wallet'
-  final bool isSelected; // true for the method the user picked
-  final bool isFirst; // true for the first row of the list
-  final bool isLast; // true for the last row (it has no line under it)
+  final String iconType;
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final bool isFirst;
+  final bool isLast;
 
   const PaymentMethodTile({
     super.key,

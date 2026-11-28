@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/user/chat/chat_controller.dart';
-import 'package:hall_mate/widgets/user/chat/conversation_tile.dart';
+import 'package:hall_mate/model/chat_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
+import 'package:hall_mate/widgets/common/conversation_tile.dart';
 
-// This is the "Messages" (Chat list) tab.
+// Chat tab (customer): one row for every venue the customer talks to.
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
 
@@ -22,37 +24,14 @@ class ChatScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Title and "new message" button ──
+            // ── Title ──
             Padding(
               padding: EdgeInsets.only(
                 left: sw * 0.05,
                 right: sw * 0.05,
                 top: sh * 0.02,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Messages', style: AppTextStyles.h1()),
-                  GestureDetector(
-                    // Later: start a new conversation
-                    onTap: () {},
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: colors.bgSurface,
-                        border: Border.all(color: colors.border),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.edit_outlined,
-                        size: 22,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              child: Text('Messages', style: AppTextStyles.h1()),
             ),
             SizedBox(height: sh * 0.018),
 
@@ -60,7 +39,7 @@ class ChatScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
               child: TextField(
-                // Every letter typed filters the list below
+                // Every letter typed filters the list straight away
                 onChanged: (text) {
                   controller.updateSearch(text);
                 },
@@ -90,7 +69,7 @@ class ChatScreen extends StatelessWidget {
             ),
             SizedBox(height: sh * 0.018),
 
-            // ── Conversations (one card, this part scrolls up and down) ──
+            // ── Conversations ──
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -105,10 +84,10 @@ class ChatScreen extends StatelessWidget {
                       border: Border.all(color: colors.border),
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    // Obx: the list changes while you type,
-                    // and the unread badge goes away when a chat is opened
+                    // Obx: the list changes while you type, and when a
+                    // new message arrives
                     child: Obx(() {
-                      final List<Map<String, dynamic>> chats =
+                      final List<ChatModel> chats =
                           controller.filteredConversations();
 
                       if (chats.isEmpty) {
@@ -124,23 +103,21 @@ class ChatScreen extends StatelessWidget {
                       }
 
                       return Column(
-                      // API: one row for every conversation in the list
-                      children: chats.map((chat) {
-                        return ConversationTile(
-                          initials: chat['initials'],
-                          name: chat['name'],
-                          message: chat['message'],
-                          time: chat['time'],
-                          unreadCount: chat['unreadCount'],
-                          avatarStyle: chat['avatar'],
-                          // no line under the last row
-                          showDivider: chat != chats.last,
-                          onTap: () {
-                            controller.openChat(chat);
-                          },
-                        );
-                      }).toList(),
-                    );
+                        children: chats.map((chat) {
+                          return ConversationTile(
+                            initials: AppFormat.initials(chat.venueName),
+                            name: chat.venueName,
+                            message: chat.lastText(),
+                            time: controller.timeText(chat),
+                            unreadCount: chat.unreadForCustomer,
+                            avatarStyle: chat.venuePhoto,
+                            showDivider: chat != chats.last,
+                            onTap: () {
+                              controller.openChat(chat);
+                            },
+                          );
+                        }).toList(),
+                      );
                     }),
                   ),
                 ),

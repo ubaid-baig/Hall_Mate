@@ -2,314 +2,258 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
 import 'package:hall_mate/controller/user/venue/media_gallery_controller.dart';
-import 'package:hall_mate/widgets/common/photo_placeholder.dart';
+import 'package:hall_mate/model/venue_model.dart';
+import 'package:hall_mate/widgets/common/media_box.dart';
 
-// Media gallery. Opens from the "1 / 15 photos" button on Venue detail.
-// It is always dark (like a photo viewer), so it uses the DARK colours even
-// when the app is in light mode. Every Text below has its colour written
-// for that reason.
+// The photos and videos the venue manager uploaded.
 class MediaGalleryScreen extends StatelessWidget {
-  const MediaGalleryScreen({super.key});
+  final String venueId;
+  final bool startOnVideos;
+
+  const MediaGalleryScreen({
+    super.key,
+    required this.venueId,
+    this.startOnVideos = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
-    // Always the dark colours
+    // The gallery always uses the dark colours, like a photo viewer
     final colors = AppColors.dark;
-    final MediaGalleryController controller = Get.put(MediaGalleryController());
+    final MediaGalleryController controller = Get.put(
+      MediaGalleryController(startTab: startOnVideos ? 1 : 0),
+    );
+    final AppDataController data = Get.find<AppDataController>();
 
     return Scaffold(
       backgroundColor: colors.bgScreen,
       body: SafeArea(
-        // One Obx for the whole screen: the big picture, the counter,
-        // the selected small picture and the tabs all change together.
-        // The two values are read here first, because ListView builds the
-        // small pictures a moment later, outside the Obx.
+        // Obx: the big picture, the counter and the tabs change on every tap
         child: Obx(() {
-        final int selected = controller.selectedThumbIndex.value;
-        final int tab = controller.selectedTabIndex.value;
-        final Map<String, String> photo = controller.selectedPhoto();
+          final VenueModel venue = data.venueById(venueId);
+          final int tab = controller.selectedTabIndex.value;
+          final int selected = controller.selectedIndex.value;
+          final List<MediaModel> list = controller.items(venue);
+          final MediaModel? item = controller.selectedItem(venue);
 
-        return Column(
-          children: [
-            // ════════ TOP BAR: close, counter, share ════════
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: sw * 0.04,
-                vertical: 10,
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: colors.bgSubtle,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 22,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        // API: position of the selected photo and the total
-                        Text(
-                          controller.counterText(),
-                          style: AppTextStyles.titleMedium(
-                            color: colors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          controller.venueName,
-                          style: AppTextStyles.caption(color: colors.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    // Later: share this photo
-                    onTap: () {},
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: colors.bgSubtle,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.share_outlined,
-                        size: 20,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ════════ BIG PICTURE (takes all the free space) ════════
-            Expanded(
-              // API: the selected photo (here only a coloured box)
-              child: PhotoPlaceholder(
-                photoStyle: photo['photo']!,
-                width: double.infinity,
-                height: double.infinity,
-                iconSize: 32,
-                showLabel: true,
-                label: photo['label']!,
-                borderRadius: BorderRadius.zero,
-              ),
-            ),
-
-            // ════════ BOTTOM PART: title, small pictures, tabs, video ════════
-            Padding(
-              padding: EdgeInsets.only(
-                left: sw * 0.05,
-                right: sw * 0.05,
-                top: 14,
-                bottom: 14,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // API: the title and uploader of the selected photo
-                  Text(
-                    photo['title']!,
-                    style: AppTextStyles.titleMedium(color: colors.textPrimary),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    controller.uploadedBy,
-                    style: AppTextStyles.caption(color: colors.textMuted),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // ── Photos tab: small pictures (scroll sideways) ──
-                  if (tab == 0) ...[
-                  SizedBox(
-                    height: 52,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      // API: one small picture for every photo
-                      itemCount: controller.thumbs.length,
-                      itemBuilder: (context, index) {
-                        final bool isSelected = selected == index;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: GestureDetector(
-                            // Shows this photo in the big picture
-                            onTap: () {
-                              controller.selectThumb(index);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: isSelected
-                                      ? colors.accent
-                                      : Colors.transparent,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: PhotoPlaceholder(
-                                photoStyle: controller.thumbs[index]['photo']!,
-                                width: 44,
-                                height: 44,
-                                iconSize: 20,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        );
+          return Column(
+            children: [
+              // ── Top bar: close (left), counter and venue name (middle) ──
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: sw * 0.04,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
                       },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colors.bgSubtle,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          size: 22,
+                          color: colors.textPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            controller.counterText(venue),
+                            style: AppTextStyles.titleMedium(
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            venue.name,
+                            style: AppTextStyles.caption(color: colors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Same width as the close button, so the title is centred
+                    const SizedBox(width: 40),
                   ],
-
-                  // ── Tabs: Photos | Videos ──
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: colors.bgSurface,
-                      border: Border.all(color: colors.border),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              controller.selectTab(0);
-                            },
-                            child: Container(
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: tab == 0
-                                    ? colors.textPrimary
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  controller.photosTab,
-                                  style: AppTextStyles.titleSmall(
-                                    color: tab == 0
-                                        ? colors.bgScreen
-                                        : colors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              controller.selectTab(1);
-                            },
-                            child: Container(
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: tab == 1
-                                    ? colors.textPrimary
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  controller.videosTab,
-                                  style: AppTextStyles.titleSmall(
-                                    color: tab == 1
-                                        ? colors.bgScreen
-                                        : colors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // ── Videos tab: the video row ──
-                  if (tab == 1) ...[
-                  const SizedBox(height: 14),
-                  GestureDetector(
-                    // Later: play the walkthrough video (needs a package)
-                    onTap: () {
-                      Get.snackbar('Video', 'Playing videos will be added later');
-                    },
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 96,
-                          height: 58,
-                          decoration: BoxDecoration(
-                            // The placeholder colour follows the app theme
-                            color: AppColors.of(context).photoSlate,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: colors.bgScreen,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.play_arrow_rounded,
-                                size: 20,
-                                color: colors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // API: title and length of the video
-                              Text(
-                                controller.videoTitle,
-                                style: AppTextStyles.titleSmall(
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                controller.videoSubtitle,
-                                style: AppTextStyles.caption(
-                                  color: colors.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ],
-        );
+
+              // ── The big photo or video ──
+              Expanded(
+                child: item == null
+                    ? Center(
+                        child: Text(
+                          tab == 0 ? 'No photos yet' : 'No videos yet',
+                          style: AppTextStyles.bodyMedium(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () {
+                          if (item.isVideo) {
+                            controller.playVideo();
+                          }
+                        },
+                        child: MediaBox(
+                          media: item,
+                          width: double.infinity,
+                          height: double.infinity,
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+              ),
+
+              // ── Title, thumbnails and tabs ──
+              Padding(
+                padding: EdgeInsets.only(
+                  left: sw * 0.05,
+                  right: sw * 0.05,
+                  top: 14,
+                  bottom: 14,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (item != null) ...[
+                      Text(
+                        item.title,
+                        style: AppTextStyles.titleMedium(
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Uploaded by the venue',
+                        style: AppTextStyles.caption(color: colors.textMuted),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    // Small pictures (scroll sideways). Tap one to show it big.
+                    if (list.isNotEmpty) ...[
+                      SizedBox(
+                        height: 52,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            final bool isSelected = selected == index;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.selectItem(index);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? colors.accent
+                                          : Colors.transparent,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: MediaBox(
+                                    media: list[index],
+                                    width: 44,
+                                    height: 44,
+                                    showLabel: false,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
+                    // ── Photos / Videos tabs ──
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colors.bgSurface,
+                        border: Border.all(color: colors.border),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.selectTab(0);
+                              },
+                              child: Container(
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: tab == 0
+                                      ? colors.textPrimary
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    controller.photosTab(venue),
+                                    style: AppTextStyles.titleSmall(
+                                      color: tab == 0
+                                          ? colors.bgScreen
+                                          : colors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.selectTab(1);
+                              },
+                              child: Container(
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: tab == 1
+                                      ? colors.textPrimary
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    controller.videosTab(venue),
+                                    style: AppTextStyles.titleSmall(
+                                      color: tab == 1
+                                          ? colors.bgScreen
+                                          : colors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         }),
       ),
     );

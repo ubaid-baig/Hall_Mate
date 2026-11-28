@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// The "- 300 +" box for choosing the number of guests.
-/// The screen passes what happens on - and + (onMinus, onPlus).
+
 class GuestStepper extends StatelessWidget {
-  final String value; // for example '300'
-  final VoidCallback? onMinus; // runs when - is tapped
-  final VoidCallback? onPlus; // runs when + is tapped
+  final String value;
+  final VoidCallback? onMinus;
+  final VoidCallback? onPlus;
 
   const GuestStepper({
     super.key,

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// The small coloured pill that shows a booking status.
-/// API: pass the status text from the booking. Use exactly:
-/// Requested, Negotiating, Accepted, Confirmed, Completed.
 class StatusChip extends StatelessWidget {
   final String status;
 
@@ -30,6 +27,9 @@ class StatusChip extends StatelessWidget {
     } else if (status == 'Confirmed') {
       bgColor = colors.primarySoft;
       inkColor = colors.primaryInk;
+    } else if (status == 'Declined') {
+      bgColor = colors.dangerSoft;
+      inkColor = colors.danger;
     }
 
     return Container(

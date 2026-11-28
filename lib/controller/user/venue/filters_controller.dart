@@ -1,20 +1,10 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/utils/app_format.dart';
 
-// ══════════════════════════════════════════════════════════
-// The Filters bottom sheet.
-//
-// The choices are kept here, and the Search screen reads them:
-//  - every choice shows as a chip on the Search screen
-//  - the Search list only shows the venues that match
-// Nothing is chosen at the start, so the Search screen has no chips.
-//
-// When you connect the API, send the choices as the query:
-//   GET /venues?type=Banquet&date=2026-12-19&slot=Dinner&guests=300
-//       &amenities=Parking,Family hall
-// ══════════════════════════════════════════════════════════
 class FiltersController extends GetxController {
   // ── Venue type ── -1 = any, 0 Ballroom, 1 Banquet, 2 Outdoor
   List<String> types = ['Ballroom', 'Banquet', 'Outdoor'];
+
   RxInt selectedTypeIndex = (-1).obs;
 
   // Tap a type to choose it. Tap it again to remove it.
@@ -34,26 +24,19 @@ class FiltersController extends GetxController {
     return types[selectedTypeIndex.value];
   }
 
-  // ── Date ── '' = any date. The date box opens the date picker.
-  RxString dateText = ''.obs;
-  List<String> dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  List<String> monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
+  // ── Date ── null = any date. Only venues free on this date are shown.
+  Rxn<DateTime> selectedDate = Rxn<DateTime>();
 
-  // Called after a date is picked: saves it as "Sat, 19   Dec"
   void setDate(DateTime date) {
-    dateText.value =
-        '${dayNames[date.weekday - 1]}, ${date.day} ${monthNames[date.month - 1]}';
+    selectedDate.value = date;
   }
 
-  // ── Slot ── 0 = Dinner, 1 = Lunch (only used when a date is chosen)
-  List<String> slots = ['Dinner', 'Lunch'];
-  RxInt selectedSlotIndex = 0.obs;
-
-  void selectSlot(int index) {
-    selectedSlotIndex.value = index;
+  // "Sat 19 Dec", or '' when no date is chosen
+  String dateText() {
+    if (selectedDate.value == null) {
+      return '';
+    }
+    return AppFormat.shortDate(selectedDate.value!);
   }
 
   // ── Guests ── 0 = any. The stepper goes up and down by 50.
@@ -79,21 +62,23 @@ class FiltersController extends GetxController {
     return '${guests.value}';
   }
 
-  // ── Budget ── Later: the slider will change these (it is only drawn now).
-  String budgetText = 'Rs 5 – 8 lakh';
-  String budgetMinText = 'Rs 2 lakh';
-  String budgetMaxText = 'Rs 15 lakh+';
+  // ── Budget: the highest rent the customer wants to pay ──
+  List<String> budgetLabels = ['Any', '2.5 lakh', '3 lakh', '4 lakh'];
+  List<int> budgetValues = [0, 250000, 300000, 400000]; // 0 = any
 
-  // ── Amenities ──
-  List<String> amenities = [
-    'Parking',
-    'Family hall',
-    'Generator',
-    'In-house catering',
-    'Valet',
-  ];
+  RxInt selectedBudgetIndex = 0.obs;
 
-  // The amenities the user chose
+  void selectBudget(int index) {
+    selectedBudgetIndex.value = index;
+  }
+
+  int maxRent() {
+    return budgetValues[selectedBudgetIndex.value];
+  }
+
+  // ── Amenities ── (the same names the manager switches on in her form)
+  List<String> amenities = ['Parking', 'Family hall', 'Generator', 'Valet'];
+
   RxList<String> selectedAmenities = <String>[].obs;
 
   // Tap to add, tap again to remove
@@ -108,9 +93,9 @@ class FiltersController extends GetxController {
   // ── Reset / Clear: everything back to "nothing chosen" ──
   void clearAll() {
     selectedTypeIndex.value = -1;
-    dateText.value = '';
-    selectedSlotIndex.value = 0;
+    selectedDate.value = null;
     guests.value = 0;
+    selectedBudgetIndex.value = 0;
     selectedAmenities.clear();
   }
 }

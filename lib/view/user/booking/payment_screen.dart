@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
 import 'package:hall_mate/controller/user/booking/payment_controller.dart';
-import 'package:hall_mate/view/user/booking/booking_confirmed_screen.dart';
+import 'package:hall_mate/model/booking_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
 import 'package:hall_mate/widgets/common/detail_row.dart';
-
 import '../../../widgets/user/booking/payment_method_tile.dart';
 
-// Pay advance. Opens after the customer accepts the final offer.
+// Pay the 25% advance of the agreed price.
 class PaymentScreen extends StatelessWidget {
-  const PaymentScreen({super.key});
+  final String bookingId;
+
+  const PaymentScreen({super.key, required this.bookingId});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +22,18 @@ class PaymentScreen extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
     final PaymentController controller = Get.put(PaymentController());
+    final AppDataController data = Get.find<AppDataController>();
+
+    // The maths comes from the booking:
+    // advance = price ÷ 4, balance = price - advance
+    final BookingModel booking = data.bookingById(bookingId);
 
     return Scaffold(
-      // White, so the status bar area matches the white top bar and bottom bar.
       backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
-            // ════════ TOP BAR ════════
+            // ── Top bar ──
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: sw * 0.05,
@@ -51,7 +58,7 @@ class PaymentScreen extends StatelessWidget {
                       Text('Pay advance', style: AppTextStyles.h3()),
                       const SizedBox(height: 2),
                       Text(
-                        'Booking ${controller.bookingId}',
+                        'Booking ${booking.id}',
                         style: AppTextStyles.caption(color: colors.textMuted),
                       ),
                     ],
@@ -61,7 +68,6 @@ class PaymentScreen extends StatelessWidget {
             ),
             Divider(color: colors.border, height: 1),
 
-            // ════════ SCROLLING MIDDLE PART ════════
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -87,20 +93,19 @@ class PaymentScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                controller.advanceLabel,
+                                'Advance to confirm (25%)',
                                 style: AppTextStyles.bodyMedium(
                                   color: colors.textOnPrimaryMute,
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              // API: 25% of the total
                               Text(
-                                controller.advanceAmount,
+                                AppFormat.rupees(booking.advance()),
                                 style: AppTextStyles.h1(color: colors.textOnPrimary),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                controller.summaryLine,
+                                controller.summaryLine(booking),
                                 style: AppTextStyles.bodySmall(
                                   color: colors.textOnPrimaryMute,
                                 ),
@@ -110,7 +115,7 @@ class PaymentScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
 
-                        // ── Price card ──
+                        // ── Price rows ──
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -123,26 +128,25 @@ class PaymentScreen extends StatelessWidget {
                             children: [
                               DetailRow(
                                 label: 'Agreed price',
-                                value: controller.agreedPrice,
+                                value: AppFormat.rupees(booking.agreedAmount()),
                               ),
                               const SizedBox(height: 12),
-                              DetailRow(label: 'Guests', value: controller.guests),
+                              DetailRow(
+                                label: 'Event',
+                                value: '${booking.eventType} · ${booking.guests} guests',
+                              ),
                               const SizedBox(height: 12),
-                              DetailRow(label: 'Total', value: controller.total),
-                              const SizedBox(height: 12),
-                              // Figma has a dashed line here. Flutter has no
-                              // dashed line without a package, so it is plain.
                               Divider(color: colors.borderDashed, height: 1),
                               const SizedBox(height: 12),
                               DetailRow(
-                                label: controller.payNowLabel,
-                                value: controller.payNow,
+                                label: 'Pay now (25%)',
+                                value: AppFormat.rupees(booking.advance()),
                                 valueColor: colors.primaryInk,
                               ),
                               const SizedBox(height: 12),
                               DetailRow(
-                                label: 'Balance after the event',
-                                value: controller.balance,
+                                label: 'Balance at the venue',
+                                value: AppFormat.rupees(booking.balance()),
                               ),
                             ],
                           ),
@@ -158,13 +162,11 @@ class PaymentScreen extends StatelessWidget {
                             border: Border.all(color: colors.border),
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          // Obx: the selected row moves when another row is tapped
+                          // Obx: the green tick moves when another method is tapped
                           child: Obx(
                             () => Column(
-                              // API: one row for every payment method in the list
                               children: controller.methods.map((method) {
                                 final int index = controller.methods.indexOf(method);
-
                                 return GestureDetector(
                                   onTap: () {
                                     controller.selectMethod(index);
@@ -185,7 +187,7 @@ class PaymentScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // ── Info box ──
+                        // ── Note ──
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
@@ -204,7 +206,8 @@ class PaymentScreen extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  controller.infoNote,
+                                  'Your date, ${AppFormat.shortDate(booking.eventDate)}, '
+                                  'is confirmed as soon as the advance is paid.',
                                   style: AppTextStyles.bodySmall(
                                     color: colors.textSecondary,
                                   ),
@@ -220,7 +223,7 @@ class PaymentScreen extends StatelessWidget {
               ),
             ),
 
-            // ════════ BOTTOM BAR (stays in place, does not scroll) ════════
+            // ── Pay button (stays in place) ──
             Container(
               color: colors.bgSurface,
               child: Column(
@@ -232,18 +235,14 @@ class PaymentScreen extends StatelessWidget {
                       vertical: 12,
                     ),
                     child: ActionButton(
-                      // API: the advance amount
-                      label: controller.payButtonText,
+                      label: 'Pay ${AppFormat.rupees(booking.advance())}',
                       icon: Icons.lock_outline,
                       height: 52,
                       bgColor: colors.primary,
                       borderColor: colors.primary,
                       textColor: colors.textOnPrimary,
-                      // Later: POST /payments first, and only if it works open the
-                      // Booking confirmed screen. For now it opens it directly.
-                      // Get.off replaces this screen, so Back does not return here.
                       onTap: () {
-                        Get.off(() => const BookingConfirmedScreen());
+                        controller.pay(booking);
                       },
                     ),
                   ),

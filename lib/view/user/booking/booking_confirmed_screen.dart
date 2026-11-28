@@ -2,32 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import 'package:hall_mate/view/user/nav_bar_widget.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/controller/shared/nav_controller.dart';
+import 'package:hall_mate/model/booking_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
 import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
+import 'package:hall_mate/view/user/nav_bar_widget.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
 import 'package:hall_mate/widgets/common/detail_row.dart';
 
-import '../../../controller/user/booking/booking_confirmed_controller.dart';
-
-// Booking confirmed: the receipt after the advance is paid.
+// Booking confirmed + receipt. Opens after paying, and from "Receipt".
 class BookingConfirmedScreen extends StatelessWidget {
-  const BookingConfirmedScreen({super.key});
+  final String bookingId;
+
+  const BookingConfirmedScreen({super.key, required this.bookingId});
 
   @override
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
-    final BookingConfirmedController controller = Get.put(
-      BookingConfirmedController(),
-    );
+    final AppDataController data = Get.find<AppDataController>();
+    final BookingModel booking = data.bookingById(bookingId);
 
     return Scaffold(
       backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
-            // ════════ TOP PART (this part scrolls if the screen is small) ════════
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -36,7 +38,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                     children: [
                       SizedBox(height: sh * 0.07),
 
-                      // The big check mark: a light circle with a green circle inside
+                      // ── Big green tick ──
                       Container(
                         width: 104,
                         height: 104,
@@ -63,15 +65,15 @@ class BookingConfirmedScreen extends StatelessWidget {
                       SizedBox(height: sh * 0.025),
                       Text('Booking confirmed!', style: AppTextStyles.h1()),
                       const SizedBox(height: 8),
-                      // API: venue name, date and slot
                       Text(
-                        controller.subtitle,
+                        '${booking.venueName} has booked\n'
+                        '${AppFormat.shortDate(booking.eventDate)} for you.',
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodyMedium(color: colors.textMuted),
                       ),
                       SizedBox(height: sh * 0.03),
 
-                      // ── Receipt card ──
+                      // ── Receipt ──
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -82,41 +84,41 @@ class BookingConfirmedScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            DetailRow(
-                              label: 'Booking ID',
-                              value: controller.bookingId,
-                            ),
+                            DetailRow(label: 'Booking ID', value: booking.id),
                             const SizedBox(height: 12),
-                            DetailRow(label: 'Venue', value: controller.venue),
+                            DetailRow(label: 'Venue', value: booking.venueName),
                             const SizedBox(height: 12),
                             DetailRow(
-                              label: 'Date & slot',
-                              value: controller.dateAndSlot,
+                              label: 'Date',
+                              value: AppFormat.dateWithYear(booking.eventDate),
                             ),
                             const SizedBox(height: 12),
                             DetailRow(
-                              label: 'Guests & package',
-                              value: controller.guestsAndPackage,
+                              label: 'Event & guests',
+                              value: '${booking.eventType} · ${booking.guests}',
                             ),
                             const SizedBox(height: 12),
                             DetailRow(
                               label: 'Agreed price',
-                              value: controller.agreedPrice,
+                              value: AppFormat.rupees(booking.agreedAmount()),
                             ),
                             const SizedBox(height: 12),
-                            // Figma has a dashed line here. Flutter has no
-                            // dashed line without a package, so it is plain.
                             Divider(color: colors.borderDashed, height: 1),
                             const SizedBox(height: 12),
                             DetailRow(
                               label: 'Advance paid',
                               badge: 'Paid',
-                              value: controller.advancePaid,
+                              value: AppFormat.rupees(booking.advance()),
                             ),
                             const SizedBox(height: 12),
                             DetailRow(
-                              label: 'Balance due after event',
-                              value: controller.balanceDue,
+                              label: 'Paid with',
+                              value: booking.paymentMethod,
+                            ),
+                            const SizedBox(height: 12),
+                            DetailRow(
+                              label: 'Balance at the venue',
+                              value: AppFormat.rupees(booking.balance()),
                             ),
                           ],
                         ),
@@ -128,7 +130,7 @@ class BookingConfirmedScreen extends StatelessWidget {
               ),
             ),
 
-            // ════════ BUTTONS (stay at the bottom) ════════
+            // ── Buttons ──
             Padding(
               padding: EdgeInsets.only(
                 left: sw * 0.05,
@@ -144,10 +146,8 @@ class BookingConfirmedScreen extends StatelessWidget {
                     bgColor: colors.primary,
                     borderColor: colors.primary,
                     textColor: colors.textOnPrimary,
-                    // Opens the Booking detail screen.
-                    // Later (API): send this booking's id along.
                     onTap: () {
-                      Get.to(() => const BookingDetailScreen());
+                      Get.off(() => BookingDetailScreen(bookingId: booking.id));
                     },
                   ),
                   const SizedBox(height: 10),
@@ -158,8 +158,6 @@ class BookingConfirmedScreen extends StatelessWidget {
                     bgColor: colors.bgSurface,
                     borderColor: colors.borderStrong,
                     textColor: colors.textPrimary,
-                    // Later: save the receipt as a PDF (needs a package).
-                    // For now it only shows a message.
                     onTap: () {
                       Get.snackbar(
                         'Receipt',
@@ -168,9 +166,9 @@ class BookingConfirmedScreen extends StatelessWidget {
                     },
                   ),
                   TextButton(
-                    // Goes back to the home screen with the bottom bar.
-                    // Get.offAll removes every screen behind it.
+                    // Back to the Home tab
                     onPressed: () {
+                      Get.find<NavController>().changeIndex(0);
                       Get.offAll(() => const NavBarWidget());
                     },
                     child: Text(

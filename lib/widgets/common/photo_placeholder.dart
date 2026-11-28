@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// A coloured box with an image icon. It stands in for a venue photo.
-///
-/// API: when you have real photos, replace the Column/Icon inside this
-/// widget with the real image (for example the venue's photo URL).
+
 class PhotoPlaceholder extends StatelessWidget {
-  final String photoStyle; // DUMMY ONLY: 'emerald', 'marigold' or 'slate'
+  final String photoStyle;
   final double? width;
   final double height;
   final double iconSize;
-  final bool showLabel; // shows a text under the icon
-  final String label; // the text under the icon (API: the photo's title)
+  final bool showLabel;
+  final String label;
   final BorderRadius borderRadius;
-  final Widget? topRow; // optional row on top of the photo (tag + heart)
+  final Widget? topRow;
 
   const PhotoPlaceholder({
     super.key,

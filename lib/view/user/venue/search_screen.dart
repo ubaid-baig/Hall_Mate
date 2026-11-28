@@ -6,9 +6,8 @@ import 'package:hall_mate/controller/user/venue/venue_search_controller.dart';
 import 'package:hall_mate/widgets/user/venue/venue_card.dart';
 import 'package:hall_mate/widgets/user/venue/filters_sheet.dart';
 import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/model/venue_model.dart';
 
-// The Search tab. Opens from the bottom bar, and from the Home
-// search field and "See all".
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
@@ -27,7 +26,7 @@ class SearchScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Top bar: back arrow, title, map button ──
+            // ── Top bar: back arrow and title ──
             Padding(
               padding: EdgeInsets.only(
                 left: sw * 0.05,
@@ -71,24 +70,6 @@ class SearchScreen extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  GestureDetector(
-                    // Later: show the venues on a map
-                    onTap: () {},
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: colors.bgSurface,
-                        border: Border.all(color: colors.border),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.map_outlined,
-                        size: 22,
-                        color: colors.textPrimary,
-                      ),
                     ),
                   ),
                 ],
@@ -255,7 +236,7 @@ class SearchScreen extends StatelessWidget {
             }),
             SizedBox(height: sh * 0.008),
 
-            // ── "Free on ..." text and sort button ──
+            // ── "Free on ..." text ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
               child: Row(
@@ -270,33 +251,16 @@ class SearchScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  TextButton(
-                    // Later: open a sort menu
-                    onPressed: () {},
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          controller.sortText,
-                          style: AppTextStyles.titleSmall(),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 20,
-                          color: colors.textPrimary,
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
+            SizedBox(height: sh * 0.015),
 
             // ── Venue list (this part scrolls up and down) ──
             Expanded(
               // Obx: the list changes while you type, and when a heart is tapped
               child: Obx(() {
-                final List<Map<String, dynamic>> venues = controller.results();
+                final List<VenueModel> venues = controller.results();
 
                 if (venues.isEmpty) {
                   return Padding(
@@ -310,7 +274,6 @@ class SearchScreen extends StatelessWidget {
 
                 return SingleChildScrollView(
                 child: Column(
-                  // API: one card for every venue in the search results
                   children: venues.map((venue) {
                     return Padding(
                       padding: EdgeInsets.only(
@@ -319,17 +282,12 @@ class SearchScreen extends StatelessWidget {
                         bottom: sh * 0.018,
                       ),
                       child: VenueCard(
-                        name: venue['name'],
-                        rating: venue['rating'],
-                        subtitle: venue['subtitle'],
-                        price: venue['price'],
-                        tag: venue['tag'],
+                        venue: venue,
                         // Red heart if this venue is saved
-                        isFavorite: favController.isSaved(venue['name']),
-                        photoStyle: venue['photo'],
+                        isFavorite: favController.isSaved(venue.id),
                         // Tap the heart: save or unsave this venue
                         onFavoriteTap: () {
-                          favController.toggleFavourite(venue);
+                          favController.toggleFavourite(venue.id);
                         },
                       ),
                     );

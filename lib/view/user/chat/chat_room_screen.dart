@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/model/booking_model.dart';
+import 'package:hall_mate/model/chat_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
 import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
-import 'package:hall_mate/widgets/user/chat/message_bubble.dart';
+import 'package:hall_mate/widgets/common/message_bubble.dart';
 import 'package:hall_mate/widgets/common/status_chip.dart';
 import '../../../controller/user/chat/chat_room_controller.dart';
 
-// Chat room: the messages with one person.
-// Opens from the Messages list and from the chat button on Booking detail.
+// Chat room (customer side): the customer and one venue.
 class ChatRoomScreen extends StatelessWidget {
-  const ChatRoomScreen({super.key});
+  final String chatId;
+
+  const ChatRoomScreen({super.key, required this.chatId});
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +23,15 @@ class ChatRoomScreen extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
     final ChatRoomController controller = Get.put(ChatRoomController());
+    final AppDataController data = Get.find<AppDataController>();
+    final ChatModel chat = data.chatById(chatId);
 
     return Scaffold(
-      // White, so the status bar area matches the white top bar.
       backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
-            // ════════ TOP BAR ════════
+            // ── Top bar: back, venue, manager name ──
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: sw * 0.05,
@@ -48,8 +54,7 @@ class ChatRoomScreen extends StatelessWidget {
                     radius: 22,
                     backgroundColor: colors.photoEmerald,
                     child: Text(
-                      // API: first letters of the name
-                      controller.initials,
+                      AppFormat.initials(chat.venueName),
                       style: AppTextStyles.labelSmall(
                         color: colors.photoEmeraldInk,
                       ),
@@ -60,149 +65,103 @@ class ChatRoomScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(controller.name, style: AppTextStyles.titleMedium()),
+                        Text(chat.venueName, style: AppTextStyles.titleMedium()),
                         const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            // API: show the green dot only when the person is online
-                            if (controller.isOnline) ...[
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: colors.success,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                            ],
-                            Text(
-                              controller.statusLine,
-                              style: AppTextStyles.caption(color: colors.textMuted),
-                            ),
-                          ],
+                        Text(
+                          '${chat.managerName} · Venue manager',
+                          style: AppTextStyles.caption(color: colors.textMuted),
                         ),
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    // Later: call the venue manager
-                    onTap: () {},
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: colors.bgSurface,
-                        border: Border.all(color: colors.border),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.phone_outlined,
-                        size: 22,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             Divider(color: colors.border, height: 1),
 
-            // ════════ BOOKING STRIP ════════
-            Padding(
-              padding: EdgeInsets.only(
-                left: sw * 0.05,
-                right: sw * 0.02,
-                top: 6,
-                bottom: 6,
+            // ── Booking strip: which booking this chat is about ──
+            if (chat.bookingId != null) ...[
+              Padding(
+                padding: EdgeInsets.only(
+                  left: sw * 0.05,
+                  right: sw * 0.02,
+                  top: 6,
+                  bottom: 6,
+                ),
+                // Obx: the status chip follows the booking
+                child: Obx(() {
+                  final BookingModel booking = data.bookingById(chat.bookingId!);
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 20,
+                        color: colors.primaryInk,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '${booking.id} · ${AppFormat.shortDate(booking.eventDate)}',
+                          style: AppTextStyles.titleSmall(),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      StatusChip(status: booking.status),
+                      TextButton(
+                        onPressed: () {
+                          Get.to(() => BookingDetailScreen(bookingId: booking.id));
+                        },
+                        child: Text(
+                          'View',
+                          style: AppTextStyles.titleSmall(color: colors.primaryInk),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 20,
-                    color: colors.primaryInk,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    // API: the booking this chat is about
-                    child: Text(
-                      controller.bookingText,
-                      style: AppTextStyles.titleSmall(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  StatusChip(status: controller.bookingStatus),
-                  TextButton(
-                    // Opens the booking. (Later: send this booking's id along.)
-                    onPressed: () {
-                      Get.to(() => const BookingDetailScreen());
-                    },
-                    child: Text(
-                      'View',
-                      style: AppTextStyles.titleSmall(color: colors.primaryInk),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(color: colors.border, height: 1),
+              Divider(color: colors.border, height: 1),
+            ],
 
-            // ════════ MESSAGES (this part scrolls up and down) ════════
+            // ── Messages ──
             Expanded(
               child: Container(
                 width: double.infinity,
                 color: colors.bgScreen,
+                // reverse: true starts at the bottom, where the newest message is
                 child: SingleChildScrollView(
-                  // Later: start at the newest message at the bottom.
+                  reverse: true,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: sw * 0.05,
-                      vertical: 14,
+                      vertical: sh * 0.018,
                     ),
-                    child: Column(
-                      children: [
-                        // The small "Today" label
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.bgNeutral,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            controller.dateSeparator,
-                            style: AppTextStyles.labelSmall(
-                              color: colors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: sh * 0.018),
-                        // Obx: a new bubble appears when you send a message
-                        Obx(
-                          () => Column(
-                            // API: one bubble for every message in the list
-                            children: controller.messages.map((message) {
-                              return MessageBubble(
-                                isMine: message['isMine'],
-                                text: message['text'],
-                                time: message['time'] ?? '',
-                                imageLabel: message['imageLabel'],
-                                photoStyle: message['photo'] ?? 'emerald',
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Obx: a sent message appears straight away
+                    child: Obx(() {
+                      final List<MessageModel> messages =
+                          data.chatById(chatId).messages;
+                      if (messages.isEmpty) {
+                        return Text(
+                          'Say hello to ${chat.venueName}',
+                          style: AppTextStyles.bodyMedium(color: colors.textMuted),
+                        );
+                      }
+                      return Column(
+                        children: messages.map((message) {
+                          return MessageBubble(
+                            isMine: !message.byManager,
+                            text: message.text,
+                            time: AppFormat.messageTime(message.sentAt),
+                          );
+                        }).toList(),
+                      );
+                    }),
                   ),
                 ),
               ),
             ),
 
-            // ════════ MESSAGE BAR (stays in place, does not scroll) ════════
+            // ── Type and send ──
             Container(
               color: colors.bgSurface,
               child: Column(
@@ -215,31 +174,12 @@ class ChatRoomScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        GestureDetector(
-                          // Later: attach a photo
-                          onTap: () {},
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: colors.primarySoft,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 24,
-                              color: colors.primaryInk,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
                             controller: controller.messageController,
                             textInputAction: TextInputAction.send,
-                            // The keyboard's send key also sends
                             onSubmitted: (text) {
-                              controller.sendMessage();
+                              controller.sendMessage(chat);
                             },
                             style: AppTextStyles.bodyLarge(),
                             decoration: InputDecoration(
@@ -255,7 +195,9 @@ class ChatRoomScreen extends StatelessWidget {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(22),
-                                borderSide: BorderSide(color: Colors.transparent),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(22),
@@ -266,10 +208,8 @@ class ChatRoomScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         GestureDetector(
-                          // Adds your message and clears the field.
-                          // Later (API): POST /conversations/{id}/messages
                           onTap: () {
-                            controller.sendMessage();
+                            controller.sendMessage(chat);
                           },
                           child: Container(
                             width: 44,

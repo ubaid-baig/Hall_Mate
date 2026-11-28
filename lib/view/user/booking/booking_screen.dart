@@ -4,6 +4,7 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/widgets/user/booking/booking_card.dart';
 import 'package:hall_mate/controller/user/booking/bookings_controller.dart';
+import 'package:hall_mate/model/booking_model.dart';
 
 // This is the "My bookings" tab.
 class BookingScreen extends StatelessWidget {
@@ -46,6 +47,7 @@ class BookingScreen extends StatelessWidget {
             // chips a moment later, outside the Obx.
             Obx(() {
             final int selected = controller.selectedFilterIndex.value;
+            final List<String> counts = controller.allCounts();
 
             return SizedBox(
               height: 40,
@@ -97,7 +99,7 @@ class BookingScreen extends StatelessWidget {
                               ),
                               child: Text(
                                 // how many bookings have this status
-                                controller.countFor(index),
+                                counts[index],
                                 style: AppTextStyles.labelTiny(
                                   color: isSelected
                                       ? colors.textOnAccent
@@ -120,8 +122,7 @@ class BookingScreen extends StatelessWidget {
             Expanded(
               // Obx: the list changes when a chip is tapped
               child: Obx(() {
-                final List<Map<String, dynamic>> list =
-                    controller.filteredBookings();
+                final List<BookingModel> list = controller.filteredBookings();
 
                 if (list.isEmpty) {
                   return Padding(
@@ -144,13 +145,16 @@ class BookingScreen extends StatelessWidget {
                         bottom: sh * 0.015,
                       ),
                       child: BookingCard(
-                        venueName: booking['venueName'],
-                        details: booking['details'],
-                        status: booking['status'],
-                        infoText: booking['infoText'],
-                        buttonText: booking['buttonText'],
-                        isButtonFilled: booking['isButtonFilled'],
-                        photoStyle: booking['photo'],
+                        venueName: booking.venueName,
+                        details: controller.detailsText(booking),
+                        status: booking.status,
+                        infoText: controller.infoText(booking),
+                        buttonText: controller.buttonText(booking),
+                        isButtonFilled: controller.isButtonFilled(booking),
+                        photo: controller.photoOf(booking),
+                        onPressed: () {
+                          controller.openBooking(booking);
+                        },
                       ),
                     );
                   }).toList(),

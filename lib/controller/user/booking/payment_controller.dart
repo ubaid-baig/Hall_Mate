@@ -1,43 +1,18 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/model/booking_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
+import 'package:hall_mate/view/user/booking/booking_confirmed_screen.dart';
 
 class PaymentController extends GetxController {
-  // ══════════════════════════════════════════════════════════
-  // DUMMY DATA for the Pay advance screen.
-  //
-  // When you connect the API:
-  //  - GET /bookings/{id} gives the agreed price, guests and total.
-  //  - The advance is 25% of the total. The balance is the rest.
-  //    Later these will be calculated here instead of typed.
-  //  - Paying is POST /payments with the booking id and the payment method.
-  //    (In a student project the Pay button can just record the payment.)
-  // ══════════════════════════════════════════════════════════
+  final AppDataController data = Get.find<AppDataController>();
 
-  // ── Top bar ──
-  String bookingId = 'HM-1042'; // API
-
-  // ── Green card ──
-  String advanceLabel = 'Advance to confirm (25%)';
-  String advanceAmount = 'Rs 1,87,500';
-  String summaryLine = 'Shaan Banquet Hall · Sat 19 Dec · Dinner';
-
-  // ── Price rows ──
-  String agreedPrice = 'Rs 2,500 / head';
-  String guests = '300';
-  String total = 'Rs 7,50,000';
-  String payNowLabel = 'Pay now (25%)';
-  String payNow = 'Rs 1,87,500';
-  String balance = 'Rs 5,62,500';
-
-  // ── Payment methods ──
-  // 'iconType' decides the picture: card, wallet or bank.
-  // Which method is selected (index in the list). Later: make it RxInt.
-  // .obs because Obx shows which row is selected.
   RxInt selectedMethodIndex = 0.obs;
 
-  // Called when a payment method row is tapped
   void selectMethod(int index) {
     selectedMethodIndex.value = index;
   }
+
   List<Map<String, String>> methods = [
     {
       'iconType': 'card',
@@ -61,8 +36,17 @@ class PaymentController extends GetxController {
     },
   ];
 
-  // ── Note and button ──
-  String infoNote =
-      'Your 19 Dec dinner slot is blocked for you as soon as the advance is paid.';
-  String payButtonText = 'Pay Rs 1,87,500';
+  // "Shaan Banquet Hall · Sat 19 Dec"
+  String summaryLine(BookingModel booking) {
+    return '${booking.venueName} · ${AppFormat.shortDate(booking.eventDate)}';
+  }
+
+  // Later (API): send the payment to the server first.
+  // The booking becomes Confirmed for BOTH sides,
+  // and the manager gets an "Advance received" notification.
+  void pay(BookingModel booking) {
+    final String method = methods[selectedMethodIndex.value]['title']!;
+    data.payAdvance(booking, method);
+    Get.off(() => BookingConfirmedScreen(bookingId: booking.id));
+  }
 }

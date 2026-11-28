@@ -2,36 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/model/venue_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
+import 'package:hall_mate/view/user/venue/venue_details_screen.dart';
+import 'package:hall_mate/widgets/common/media_box.dart';
 
-import '../../../view/user/venue/venue_details_screen.dart';
-import '../../common/photo_placeholder.dart';
-
-
-/// The big venue card: photo on top (with a tag and a heart), details below.
-/// Used in "Featured venues" (Home) and in the Search results list.
-///
-/// API: every value comes from one venue in your API list.
+/// The big venue card: cover photo on top (with a tag and a heart), details below.
+/// Used in "Featured venues" (Home), Search results and Saved venues.
 class VenueCard extends StatelessWidget {
-  final String name; // API: venue name
-  final String rating; // API: average rating, e.g. '4.5'
-  final String subtitle; // API: area + capacity (+ extras)
-  final String price; // API: starting price per head, e.g. 'Rs 2,200'
-  final String tag; // text on the white pill over the photo
-  final bool isFavorite; // API: is this venue in the user's favourites?
-  final String photoStyle; // DUMMY ONLY: placeholder colour
+  final VenueModel venue;
+  final bool isFavorite; // is this venue in the saved list?
   final double photoHeight;
-  // Runs when the heart is tapped. Optional, so screens that don't pass it still work.
+  // Runs when the heart is tapped
   final VoidCallback? onFavoriteTap;
 
   const VenueCard({
     super.key,
-    required this.name,
-    required this.rating,
-    required this.subtitle,
-    required this.price,
-    required this.tag,
+    required this.venue,
     required this.isFavorite,
-    required this.photoStyle,
     this.photoHeight = 150,
     this.onFavoriteTap,
   });
@@ -41,11 +29,9 @@ class VenueCard extends StatelessWidget {
     final colors = AppColors.of(context);
 
     return GestureDetector(
-      // Opens the Venue detail screen.
-      // API: send this venue's id along, for example
-      // Get.to(() => VenueDetailScreen(), arguments: venueId)
+      // Opens the Venue detail screen of THIS venue
       onTap: () {
-        Get.to(() => const VenueDetailScreen());
+        Get.to(() => VenueDetailScreen(venueId: venue.id));
       },
       child: Container(
         decoration: BoxDecoration(
@@ -56,13 +42,11 @@ class VenueCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Photo with the tag (left) and the heart (right) on top ──
-            PhotoPlaceholder(
-              photoStyle: photoStyle,
+            // ── Cover photo with the tag (left) and the heart (right) on top ──
+            MediaBox(
+              media: venue.coverOrPlaceholder(),
               width: double.infinity,
               height: photoHeight,
-              iconSize: 28,
-              showLabel: true,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(17),
                 topRight: Radius.circular(17),
@@ -81,7 +65,7 @@ class VenueCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      tag,
+                      venue.type,
                       style: AppTextStyles.labelSmall(color: colors.primaryInk),
                     ),
                   ),
@@ -108,7 +92,7 @@ class VenueCard extends StatelessWidget {
               ),
             ),
 
-            // ── Name, rating, details, price ──
+            // ── Name, rating, details, rent ──
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -116,16 +100,16 @@ class VenueCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Text(name, style: AppTextStyles.h3())),
+                      Expanded(child: Text(venue.name, style: AppTextStyles.h3())),
                       const SizedBox(width: 8),
                       Icon(Icons.star_rounded, size: 16, color: colors.iconStar),
                       const SizedBox(width: 3),
-                      Text(rating, style: AppTextStyles.titleSmall()),
+                      Text(venue.ratingText(), style: AppTextStyles.titleSmall()),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    subtitle,
+                    venue.subtitle(),
                     style: AppTextStyles.bodySmall(color: colors.textMuted),
                   ),
                   const SizedBox(height: 8),
@@ -133,14 +117,13 @@ class VenueCard extends StatelessWidget {
                     text: TextSpan(
                       style: AppTextStyles.bodySmall(color: colors.textMuted),
                       children: [
-                        const TextSpan(text: 'from '),
                         TextSpan(
-                          text: price,
+                          text: AppFormat.rupees(venue.rent),
                           style: AppTextStyles.titleMedium(
                             color: colors.primaryInk,
                           ),
                         ),
-                        const TextSpan(text: ' / head'),
+                        const TextSpan(text: ' / event'),
                       ],
                     ),
                   ),

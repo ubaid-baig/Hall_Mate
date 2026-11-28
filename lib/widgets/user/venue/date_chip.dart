@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// One day in the "Free dates" row: day name, date number and two small bars.
-/// The left bar is lunch, the right bar is dinner.
-///   green bar = free        grey bar = booked
-/// The selected day is filled green and its free bar turns orange.
-///
-/// API: every value comes from one day in the availability list.
+// One day in the "Free dates" row of Venue detail.
+// The small bar under the date is green when the day is free.
 class DateChip extends StatelessWidget {
   final String day; // for example 'Mon'
   final String date; // for example '14'
-  final bool isLunchFree; // API: is the lunch slot free?
-  final bool isDinnerFree; // API: is the dinner slot free?
+  final bool isFree; // no booking on this day yet
   final bool isSelected; // true for the day the user picked
 
   const DateChip({
     super.key,
     required this.day,
     required this.date,
-    required this.isLunchFree,
-    required this.isDinnerFree,
+    required this.isFree,
     required this.isSelected,
   });
 
@@ -28,7 +22,6 @@ class DateChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
-    // Bar colours
     final Color freeColor = isSelected ? colors.accent : colors.success;
     final Color bookedColor = isSelected
         ? colors.textOnPrimary.withValues(alpha: 0.4)
@@ -57,27 +50,13 @@ class DateChip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 10,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isLunchFree ? freeColor : bookedColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 3),
-              Container(
-                width: 10,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDinnerFree ? freeColor : bookedColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
+          Container(
+            width: 20,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isFree ? freeColor : bookedColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
         ],
       ),

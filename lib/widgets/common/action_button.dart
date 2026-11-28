@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 
-/// A big button with an optional icon on the left.
-/// We pass the colours in, so the same widget gives a filled button
-/// (green background) or an outlined button (white background + border).
-/// The height is 48 unless you pass another one.
 class ActionButton extends StatelessWidget {
   final String label;
   final IconData? icon; // optional icon before the text

@@ -11,7 +11,6 @@ class ReviewCard extends StatelessWidget {
   final String subtitle; // API: event type and month, e.g. 'Walima · Nov 2026'
   final int rating; // API: 1 to 5 stars
   final String text; // API: the review text
-  final String? managerReply; // API: the manager's reply, or null
 
   const ReviewCard({
     super.key,
@@ -20,7 +19,6 @@ class ReviewCard extends StatelessWidget {
     required this.subtitle,
     required this.rating,
     required this.text,
-    this.managerReply,
   });
 
   // One star. It is orange if the rating reaches this position, grey if not.
@@ -84,31 +82,6 @@ class ReviewCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(text, style: AppTextStyles.bodyMedium()),
 
-          // The manager's reply box. It only shows when there is a reply.
-          if (managerReply != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colors.bgSubtle,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.reply, size: 18, color: colors.primaryInk),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Manager: $managerReply',
-                      style: AppTextStyles.bodySmall(color: colors.textSecondary),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );

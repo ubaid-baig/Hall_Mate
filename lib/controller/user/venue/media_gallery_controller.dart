@@ -1,64 +1,66 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/model/venue_model.dart';
 
 class MediaGalleryController extends GetxController {
-  // ══════════════════════════════════════════════════════════
-  // DUMMY DATA for the Media gallery screen.
-  //
-  // When you connect the API:
-  //  - GET /venues/{id}/media  (photos and videos of the venue)
-  //  - The big picture shows the selected photo. Tapping a small picture
-  //    changes it, and the title lines change with it.
-  //  - 'photo' values below are DUMMY ONLY (a colour for the placeholder).
-  //    With the API, show the real photo instead.
-  // ══════════════════════════════════════════════════════════
-
-  // ── Top bar ──
-  String venueName = 'Shaan Banquet Hall';
-  int totalPhotos = 15; // API: how many photos the venue has
-
-  // ── The photos (small pictures row) ──
-  // 'photo' is DUMMY ONLY (a colour). 'label' is written on the big picture,
-  // 'title' is the line under it.
-  List<Map<String, String>> thumbs = [
-    {'photo': 'emerald', 'label': 'Main hall', 'title': 'Main hall · 500 seats'},
-    {'photo': 'marigold', 'label': 'Entrance', 'title': 'Entrance · flower arch'},
-    {'photo': 'marigold', 'label': 'Stage décor', 'title': 'Main stage · white & gold setup'},
-    {'photo': 'slate', 'label': 'Family hall', 'title': 'Family hall · separate entry'},
-    {'photo': 'emerald', 'label': 'Dining', 'title': 'Dining area · buffet line'},
-  ];
-  String uploadedBy = 'Uploaded by the venue · Nov 2026';
-
-  // Which photo is selected. .obs because Obx shows it.
-  RxInt selectedThumbIndex = 2.obs;
-
-  // Called when a small picture is tapped
-  void selectThumb(int index) {
-    selectedThumbIndex.value = index;
+  // startTab: 0 = open on Photos, 1 = open on Videos
+  MediaGalleryController({int startTab = 0}) {
+    selectedTabIndex.value = startTab;
   }
 
-  // "3 / 15"
-  String counterText() {
-    return '${selectedThumbIndex.value + 1} / $totalPhotos';
-  }
-
-  // The selected photo (its photo, label and title)
-  Map<String, String> selectedPhoto() {
-    return thumbs[selectedThumbIndex.value];
-  }
-
-  // ── Tabs ──
-  // Which tab is selected: 0 = Photos, 1 = Videos.
+  // Which tab is selected: 0 = Photos, 1 = Videos
   RxInt selectedTabIndex = 0.obs;
+
+  // Which photo / video is shown big
+  RxInt selectedIndex = 0.obs;
 
   void selectTab(int index) {
     selectedTabIndex.value = index;
+    selectedIndex.value = 0;
   }
 
-  String photosTab = 'Photos (15)';
-  String videosTab = 'Videos (1)';
+  void selectItem(int index) {
+    selectedIndex.value = index;
+  }
 
-  // ── Video row ──
-  // API: the walkthrough video of the venue
-  String videoTitle = 'Walkthrough video';
-  String videoSubtitle = '2:14 · main hall to family hall';
+  // The photos or the videos, depending on the tab
+  List<MediaModel> items(VenueModel venue) {
+    if (selectedTabIndex.value == 0) {
+      return venue.photos();
+    }
+    return venue.videos();
+  }
+
+  // The item shown big, or null when the tab is empty
+  MediaModel? selectedItem(VenueModel venue) {
+    final List<MediaModel> list = items(venue);
+    if (list.isEmpty) {
+      return null;
+    }
+    // If the manager deleted a file, the index may be too big now
+    if (selectedIndex.value >= list.length) {
+      return list.first;
+    }
+    return list[selectedIndex.value];
+  }
+
+  // "3 / 15"
+  String counterText(VenueModel venue) {
+    final int total = items(venue).length;
+    if (total == 0) {
+      return '0 / 0';
+    }
+    return '${selectedIndex.value + 1} / $total';
+  }
+
+  String photosTab(VenueModel venue) {
+    return 'Photos (${venue.photos().length})';
+  }
+
+  String videosTab(VenueModel venue) {
+    return 'Videos (${venue.videos().length})';
+  }
+
+  void playVideo() {
+    Get.snackbar('Video', 'Playing videos inside the app comes later');
+  }
 }

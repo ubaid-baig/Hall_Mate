@@ -4,7 +4,6 @@ import 'package:hall_mate/constants/app_assets.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/shared/auth_controller.dart';
-import 'package:hall_mate/view/auth/login_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -308,7 +307,7 @@ class SignUpScreen extends StatelessWidget {
                       ),
                       SizedBox(height: sh * 0.01),
                       Text(
-                        'Next you\'ll add per-head menu packages and minimum guests.',
+                        'Next you\'ll add your rent, capacity and photos.',
                         style: AppTextStyles.bodySmall(color: colors.textMuted),
                       ),
                       SizedBox(height: sh * 0.02),
@@ -316,6 +315,7 @@ class SignUpScreen extends StatelessWidget {
                       Text('Venue name', style: AppTextStyles.titleSmall()),
                       SizedBox(height: sh * 0.01),
                       TextField(
+                    controller: controller.venueNameController,
                         textInputAction: TextInputAction.next,
                         style: AppTextStyles.bodyLarge(),
                         decoration: InputDecoration(
@@ -350,6 +350,7 @@ class SignUpScreen extends StatelessWidget {
                 Text('Full name', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
                 TextField(
+                    controller: controller.nameController,
                   keyboardType: TextInputType.name,
                   textInputAction: TextInputAction.next,
                   style: AppTextStyles.bodyLarge(),
@@ -382,6 +383,7 @@ class SignUpScreen extends StatelessWidget {
                 Text('Email', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
                 TextField(
+                    controller: controller.emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   style: AppTextStyles.bodyLarge(),
@@ -414,6 +416,7 @@ class SignUpScreen extends StatelessWidget {
                 Text('Phone number', style: AppTextStyles.titleSmall()),
                 SizedBox(height: sh * 0.01),
                 TextField(
+                    controller: controller.phoneController,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                   style: AppTextStyles.bodyLarge(),
@@ -447,6 +450,7 @@ class SignUpScreen extends StatelessWidget {
                 SizedBox(height: sh * 0.01),
                 Obx(
                       () => TextField(
+                    controller: controller.passwordController,
                     textInputAction: TextInputAction.done,
                     obscureText: controller.isObscure.value,
                     style: AppTextStyles.bodyLarge(),
@@ -486,7 +490,7 @@ class SignUpScreen extends StatelessWidget {
                 ),
                 SizedBox(height: sh * 0.02),
 
-                // Admin-approval note is about venues, so only a venue manager sees it.
+                // The setup note is about venues, so only a venue manager sees it.
                 Obx(() {
                   if (!controller.isVenueManager.value) {
                     return const SizedBox();
@@ -511,7 +515,7 @@ class SignUpScreen extends StatelessWidget {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'New venues stay hidden from search until an admin approves them. You can set up photos and packages while you wait.',
+                                'Your venue stays hidden from search until you finish the setup: the venue details and at least one photo.',
                                 style: AppTextStyles.bodySmall(
                                   color: colors.accentInk,
                                 ),
@@ -529,7 +533,9 @@ class SignUpScreen extends StatelessWidget {
                   width: double.infinity,
                   height: (sh * 0.065).clamp(48.0, 58.0),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      controller.signUp();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.primary,
                       foregroundColor: colors.textOnPrimary,

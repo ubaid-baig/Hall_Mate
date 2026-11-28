@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:hall_mate/app/app_theme.dart';
-import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
 import 'package:get/get.dart';
-import 'package:hall_mate/view/manager/dashboard/manager_dashboard_screen.dart';
-import 'package:hall_mate/view/manager/venue_setup/ballroom_details.dart';
-import 'package:hall_mate/widgets/manager/manager_navbar_widget.dart';
-import 'controller/shared/auth_controller.dart';
-import 'controller/shared/nav_controller.dart';
-import 'controller/shared/theme_controller.dart';
+import 'package:hall_mate/app/app_theme.dart';
+import 'package:hall_mate/controller/manager/manager_nav_controller.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/controller/shared/auth_controller.dart';
+import 'package:hall_mate/controller/shared/nav_controller.dart';
+import 'package:hall_mate/controller/shared/theme_controller.dart';
+import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/view/auth/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Controllers are created once here, every screen then uses Get.find.
-  Get.put(AuthController());
+  // AppDataController comes first: it holds the data both sides share.
+  Get.put(AppDataController());
   Get.put(NavController());
-
-  
-
+  Get.put(ManagerNavController());
   Get.put(FavouriteController());
+  Get.put(AuthController());
 
   final ThemeController themeController = Get.put(ThemeController());
-
   await themeController.loadSavedTheme();
 
-  runApp(Main());
+  runApp(const Main());
 }
 
 class Main extends StatelessWidget {
@@ -38,11 +37,7 @@ class Main extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeController.themeMode,
-      // home: SplashScreen(),
-      // home: ManagerDashboardScreen()
-      // ab yha per navbar kholen
-home: ManagerNavBarWidget(),
-
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

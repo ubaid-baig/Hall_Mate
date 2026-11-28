@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import 'package:hall_mate/view/user/booking/booking_detail_screen.dart';
-import 'package:hall_mate/widgets/common/photo_placeholder.dart';
+import 'package:hall_mate/model/venue_model.dart';
+import 'package:hall_mate/widgets/common/media_box.dart';
 import 'package:hall_mate/widgets/common/status_chip.dart';
-import 'package:hall_mate/view/user/booking/write_review_screen.dart';
-import 'package:hall_mate/view/user/booking/booking_confirmed_screen.dart';
 
-/// One booking in the "My bookings" list.
-///
-/// API: every value comes from one booking in your API list.
-/// The button text and style depend on the status, for example:
-///   Negotiating -> 'Reply' (filled)      Requested -> 'View' (outlined)
-///   Confirmed   -> 'Receipt' (outlined)  Completed -> 'Write a review' (filled)
+// One booking in "My bookings". The controller decides every text
+// and what the button opens.
 class BookingCard extends StatelessWidget {
-  final String venueName; // API: venue name
-  final String details; // API: date, slot and guests
-  final String status; // API: booking status
-  final String infoText; // small line on the left of the button
-  final String buttonText; // text of the button
-  final bool isButtonFilled; // true = green button, false = outlined button
-  final String photoStyle; // DUMMY ONLY: placeholder colour
+  final String venueName;
+  final String details;
+  final String status;
+  final String infoText;
+  final String buttonText;
+  final bool isButtonFilled;
+  final MediaModel photo; // the venue's cover
+  final VoidCallback onPressed;
 
   const BookingCard({
     super.key,
@@ -31,7 +25,8 @@ class BookingCard extends StatelessWidget {
     required this.infoText,
     required this.buttonText,
     required this.isButtonFilled,
-    required this.photoStyle,
+    required this.photo,
+    required this.onPressed,
   });
 
   @override
@@ -50,11 +45,11 @@ class BookingCard extends StatelessWidget {
           // ── Top: photo, venue name, status chip, details ──
           Row(
             children: [
-              PhotoPlaceholder(
-                photoStyle: photoStyle,
+              MediaBox(
+                media: photo,
                 width: 52,
                 height: 52,
-                iconSize: 22,
+                showLabel: false,
                 borderRadius: BorderRadius.circular(14),
               ),
               const SizedBox(width: 12),
@@ -101,23 +96,7 @@ class BookingCard extends StatelessWidget {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  // A completed booking opens the Write review screen,
-                  // every other booking opens the Booking detail screen.
-                  // API: send this booking's id to the screen, for example
-                  // Get.to(() => BookingDetailScreen(), arguments: bookingId)
-                  // and load GET /bookings/{id} in BookingDetailController.
-                  onPressed: () {
-                    if (status == 'Completed') {
-                      // "Write a review"
-                      Get.to(() => const WriteReviewScreen());
-                    } else if (status == 'Confirmed') {
-                      // "Receipt": the booking confirmed screen
-                      Get.to(() => const BookingConfirmedScreen());
-                    } else {
-                      // "Reply" / "View"
-                      Get.to(() => const BookingDetailScreen());
-                    }
-                  },
+                  onPressed: onPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         isButtonFilled ? colors.primary : colors.bgSurface,

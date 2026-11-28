@@ -4,6 +4,7 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/widgets/user/venue/venue_card.dart';
 import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/model/venue_model.dart';
 
 // Saved venues. Opens from Profile > Account > Saved venues.
 class FavouriteScreen extends StatelessWidget {
@@ -133,7 +134,7 @@ class FavouriteScreen extends StatelessWidget {
                     Expanded(
                       // Obx: the list changes when a chip or a heart is tapped
                       child: Obx(() {
-                        final List<Map<String, dynamic>> venues =
+                        final List<VenueModel> venues =
                             controller.filteredVenues();
 
                         if (venues.isEmpty) {
@@ -161,17 +162,11 @@ class FavouriteScreen extends StatelessWidget {
                                 bottom: sh * 0.018,
                               ),
                               child: VenueCard(
-                                name: venue['name'],
-                                rating: venue['rating'],
-                                subtitle: venue['subtitle'],
-                                price: venue['price'],
-                                tag: venue['type'],
-                                // Everything on this screen is saved
+                                venue: venue,
                                 isFavorite: true,
-                                photoStyle: venue['photo'],
-                                // Tap the heart: unsave, the card disappears
+                                // Tap the heart: remove it from the saved list
                                 onFavoriteTap: () {
-                                  controller.toggleFavourite(venue);
+                                  controller.toggleFavourite(venue.id);
                                 },
                               ),
                             );

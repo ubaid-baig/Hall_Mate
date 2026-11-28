@@ -2,39 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/model/venue_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
 import 'package:hall_mate/view/user/venue/venue_details_screen.dart';
-import 'package:hall_mate/widgets/common/photo_placeholder.dart';
+import 'package:hall_mate/widgets/common/media_box.dart';
 
-/// The small venue card: square photo on the left, details on the right.
-/// Used in "Near you" (Home).
-///
-/// API: every value comes from one venue in your API list.
+/// The small venue card: photo on the left, details on the right.
+/// Used in "Near you" on Home.
 class VenueRowCard extends StatelessWidget {
-  final String name; // API: venue name
-  final String rating; // API: average rating
-  final String subtitle; // API: type + distance + capacity
-  final String price; // API: starting price per head
-  final String photoStyle; // DUMMY ONLY: placeholder colour
+  final VenueModel venue;
 
-  const VenueRowCard({
-    super.key,
-    required this.name,
-    required this.rating,
-    required this.subtitle,
-    required this.price,
-    required this.photoStyle,
-  });
+  const VenueRowCard({super.key, required this.venue});
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
 
     return GestureDetector(
-      // Opens the Venue detail screen.
-      // API: send this venue's id along, for example
-      // Get.to(() => VenueDetailScreen(), arguments: venueId)
       onTap: () {
-        Get.to(() => const VenueDetailScreen());
+        Get.to(() => VenueDetailScreen(venueId: venue.id));
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -45,11 +31,11 @@ class VenueRowCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            PhotoPlaceholder(
-              photoStyle: photoStyle,
+            MediaBox(
+              media: venue.coverOrPlaceholder(),
               width: 80,
               height: 80,
-              iconSize: 24,
+              showLabel: false,
               borderRadius: BorderRadius.circular(14),
             ),
             const SizedBox(width: 14),
@@ -60,17 +46,17 @@ class VenueRowCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(name, style: AppTextStyles.titleLarge()),
+                        child: Text(venue.name, style: AppTextStyles.titleLarge()),
                       ),
                       const SizedBox(width: 8),
                       Icon(Icons.star_rounded, size: 16, color: colors.iconStar),
                       const SizedBox(width: 3),
-                      Text(rating, style: AppTextStyles.titleSmall()),
+                      Text(venue.ratingText(), style: AppTextStyles.titleSmall()),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    '${venue.type} · ${venue.subtitle()}',
                     style: AppTextStyles.bodySmall(color: colors.textMuted),
                   ),
                   const SizedBox(height: 6),
@@ -78,14 +64,13 @@ class VenueRowCard extends StatelessWidget {
                     text: TextSpan(
                       style: AppTextStyles.bodySmall(color: colors.textMuted),
                       children: [
-                        const TextSpan(text: 'from '),
                         TextSpan(
-                          text: price,
+                          text: AppFormat.rupees(venue.rent),
                           style: AppTextStyles.titleMedium(
                             color: colors.primaryInk,
                           ),
                         ),
-                        const TextSpan(text: ' / head'),
+                        const TextSpan(text: ' / event'),
                       ],
                     ),
                   ),

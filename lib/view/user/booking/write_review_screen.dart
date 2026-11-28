@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/model/booking_model.dart';
 import 'package:hall_mate/widgets/common/action_button.dart';
-import 'package:hall_mate/widgets/common/photo_placeholder.dart';
+import 'package:hall_mate/widgets/common/media_box.dart';
 import 'package:hall_mate/widgets/common/star_row.dart';
 import '../../../controller/user/booking/write_review_controller.dart';
 
+// Write a review. Opens for a Completed booking.
 class WriteReviewScreen extends StatelessWidget {
-  const WriteReviewScreen({super.key});
+  final String bookingId;
+
+  const WriteReviewScreen({super.key, required this.bookingId});
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +21,15 @@ class WriteReviewScreen extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
     final WriteReviewController controller = Get.put(WriteReviewController());
+    final AppDataController data = Get.find<AppDataController>();
+    final BookingModel booking = data.bookingById(bookingId);
 
     return Scaffold(
-      // White, so the status bar area matches the white top bar and bottom bar.
       backgroundColor: colors.bgSurface,
       body: SafeArea(
         child: Column(
           children: [
-
+            // ── Top bar ──
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: sw * 0.05,
@@ -48,7 +54,7 @@ class WriteReviewScreen extends StatelessWidget {
                       Text('Write a review', style: AppTextStyles.h3()),
                       const SizedBox(height: 2),
                       Text(
-                        controller.venueName,
+                        booking.venueName,
                         style: AppTextStyles.caption(color: colors.textMuted),
                       ),
                     ],
@@ -81,11 +87,13 @@ class WriteReviewScreen extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              PhotoPlaceholder(
-                                photoStyle: controller.photo,
+                              MediaBox(
+                                media: data
+                                    .venueById(booking.venueId)
+                                    .coverOrPlaceholder(),
                                 width: 52,
                                 height: 52,
-                                iconSize: 22,
+                                showLabel: false,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               const SizedBox(width: 12),
@@ -94,12 +102,12 @@ class WriteReviewScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      controller.venueName,
+                                      booking.venueName,
                                       style: AppTextStyles.titleMedium(),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      controller.eventLine,
+                                      controller.eventLine(booking),
                                       style: AppTextStyles.bodySmall(
                                         color: colors.textMuted,
                                       ),
@@ -112,6 +120,7 @@ class WriteReviewScreen extends StatelessWidget {
                         ),
                         SizedBox(height: sh * 0.03),
 
+                        // ── Overall stars ──
                         Center(
                           child: Text(
                             'How was your event?',
@@ -119,9 +128,8 @@ class WriteReviewScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        // Tap a star to change the rating.
-                        // Obx: the stars and the word change straight away.
                         Center(
+                          // Obx: the stars fill up to the tapped one
                           child: Obx(
                             () => StarRow(
                               rating: controller.overallRating.value,
@@ -144,53 +152,7 @@ class WriteReviewScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: sh * 0.025),
-
-                        // ── Category ratings ──
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colors.bgSurface,
-                            border: Border.all(color: colors.border),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          // Obx: a row's stars change when tapped
-                          child: Obx(
-                            () => Column(
-                            // API: one row for every category
-                            children: controller.categories.map((category) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        category['label'],
-                                        style: AppTextStyles.bodyMedium(),
-                                      ),
-                                    ),
-                                    StarRow(
-                                      rating: category['rating'],
-                                      size: 22,
-                                      onStarTap: (stars) {
-                                        controller.setCategoryRating(
-                                          category,
-                                          stars,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          ),
-                        ),
-                        SizedBox(height: sh * 0.025),
+                        SizedBox(height: sh * 0.03),
 
                         // ── Review text ──
                         Text(
@@ -213,7 +175,6 @@ class WriteReviewScreen extends StatelessWidget {
                               TextField(
                                 controller: controller.reviewController,
                                 keyboardType: TextInputType.multiline,
-                                // Every key typed updates the "84 / 500" counter
                                 onChanged: (text) {
                                   controller.updateLetterCount(text);
                                 },
@@ -222,13 +183,16 @@ class WriteReviewScreen extends StatelessWidget {
                                 style: AppTextStyles.bodyLarge(),
                                 decoration: InputDecoration(
                                   contentPadding: EdgeInsets.zero,
-
-                                  enabledBorder: OutlineInputBorder(
+                                  hintText: 'What did you like? What could be better?',
+                                  hintStyle: AppTextStyles.bodyLarge(
+                                    color: colors.textMuted,
+                                  ),
+                                  enabledBorder: const OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.transparent,
                                     ),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
+                                  focusedBorder: const OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Colors.transparent,
                                     ),
@@ -249,65 +213,6 @@ class WriteReviewScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        SizedBox(height: sh * 0.025),
-
-                        // ── Photos ──
-                        Text(
-                          'Add photos (optional)',
-                          style: AppTextStyles.titleMedium(),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            PhotoPlaceholder(
-                              photoStyle: 'marigold',
-                              width: 64,
-                              height: 64,
-                              iconSize: 24,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            const SizedBox(width: 10),
-                            PhotoPlaceholder(
-                              photoStyle: 'emerald',
-                              width: 64,
-                              height: 64,
-                              iconSize: 24,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            const SizedBox(width: 10),
-
-                            GestureDetector(
-                              // Later: pick a photo from the gallery
-                              onTap: () {},
-                              child: Container(
-                                width: 64,
-                                height: 64,
-                                decoration: BoxDecoration(
-                                  color: colors.bgSurface,
-                                  border: Border.all(color: colors.borderDashed),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.photo_camera_outlined,
-                                      size: 22,
-                                      color: colors.textSecondary,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Add',
-                                      style: AppTextStyles.labelTiny(
-                                        color: colors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -315,6 +220,7 @@ class WriteReviewScreen extends StatelessWidget {
               ),
             ),
 
+            // ── Post button ──
             Container(
               color: colors.bgSurface,
               child: Column(
@@ -331,10 +237,8 @@ class WriteReviewScreen extends StatelessWidget {
                       bgColor: colors.primary,
                       borderColor: colors.primary,
                       textColor: colors.textOnPrimary,
-                      // Checks the text, goes back, shows "Thank you!"
-                      // Later (API): POST /reviews first.
                       onTap: () {
-                        controller.postReview();
+                        controller.postReview(booking);
                       },
                     ),
                   ),

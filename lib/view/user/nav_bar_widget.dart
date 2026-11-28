@@ -18,11 +18,11 @@ class NavBarWidget extends StatelessWidget {
     final NavController navController = Get.find<NavController>();
 
     final List<Widget> screenList = [
-      HomeScreen(),
-      SearchScreen(),
-      BookingScreen(),
-      ChatScreen(),
-      ProfileScreen(),
+      const HomeScreen(),
+      const SearchScreen(),
+      const BookingScreen(),
+      const ChatScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(

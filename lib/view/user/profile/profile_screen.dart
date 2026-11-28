@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
-import 'package:hall_mate/controller/user/profile/profile_controller.dart';
 import 'package:hall_mate/controller/shared/theme_controller.dart';
-import 'package:hall_mate/widgets/user/profile/profile_row.dart';
-import 'package:hall_mate/view/user/venue/favourite_screen.dart';
+import 'package:hall_mate/controller/user/home/notifications_controller.dart';
+import 'package:hall_mate/controller/user/profile/profile_controller.dart';
 import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/view/user/home/notifications_screen.dart';
+import 'package:hall_mate/view/user/venue/favourite_screen.dart';
+import 'package:hall_mate/widgets/common/profile_row.dart';
 
-// This is the "Profile & settings" tab.
+// Profile tab (customer). The manager has her own Profile screen.
 class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
-  final ProfileController controller = Get.put(ProfileController());
-  // Already created in main.dart
-  final ThemeController themeController = Get.find<ThemeController>();
-  // The saved venues. Created once in main.dart.
-  final FavouriteController favController = Get.find<FavouriteController>();
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final sh = MediaQuery.of(context).size.height;
     final sw = MediaQuery.of(context).size.width;
     final colors = AppColors.of(context);
+    final ProfileController controller = Get.put(ProfileController());
+    final ThemeController themeController = Get.find<ThemeController>();
+    final FavouriteController favController = Get.find<FavouriteController>();
+    final NotificationsController notificationsController = Get.put(
+      NotificationsController(),
+    );
 
     return Scaffold(
       backgroundColor: colors.bgScreen,
@@ -51,37 +54,34 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Obx: shows the photo once one is taken
+                      // Obx: the photo shows after it is taken
                       Obx(
-                            () => controller.pickedImage.value != null
+                        () => controller.pickedImage.value != null
                             ? CircleAvatar(
-                          radius: 36,
-                          backgroundImage:
-                          FileImage(controller.pickedImage.value!),
-                        )
+                                radius: 36,
+                                backgroundImage:
+                                    FileImage(controller.pickedImage.value!),
+                              )
                             : CircleAvatar(
-                          radius: 36,
-                          backgroundColor: colors.photoMarigold,
-                          child: Text(
-                            // API: first letters of the user's name
-                            controller.initials,
-                            style: AppTextStyles.titleLarge(
-                              color: colors.photoMarigoldInk,
-                            ),
-                          ),
-                        ),
+                                radius: 36,
+                                backgroundColor: colors.photoMarigold,
+                                child: Text(
+                                  controller.initials(),
+                                  style: AppTextStyles.titleLarge(
+                                    color: colors.photoMarigoldInk,
+                                  ),
+                                ),
+                              ),
                       ),
                       SizedBox(height: sh * 0.012),
-                      // API: name, email and phone come from the user profile
-                      Text(controller.name, style: AppTextStyles.h2()),
+                      Text(controller.name(), style: AppTextStyles.h2()),
                       const SizedBox(height: 4),
                       Text(
-                        '${controller.email} · ${controller.phone}',
+                        '${controller.email()} · ${controller.phone()}',
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall(color: colors.textMuted),
                       ),
                       SizedBox(height: sh * 0.012),
-                      // API: the user's role (Customer or Venue manager)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -101,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              controller.role,
+                              controller.role(),
                               style: AppTextStyles.labelSmall(
                                 color: colors.primaryInk,
                               ),
@@ -113,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
                       SizedBox(
                         height: 44,
                         child: ElevatedButton(
-                          // Opens the camera to take a new photo
+                          // Opens the camera to take a profile photo
                           onPressed: controller.openCamera,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.bgSurface,
@@ -128,13 +128,13 @@ class ProfileScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.edit_outlined,
+                                Icons.photo_camera_outlined,
                                 size: 18,
                                 color: colors.textPrimary,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Edit profile',
+                                'Change photo',
                                 style: AppTextStyles.titleSmall(),
                               ),
                             ],
@@ -162,32 +162,34 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Later: add onTap to each row to open its screen
-                      const ProfileRow(
-                        icon: Icons.person_outline,
-                        title: 'Personal info',
-                        subtitle: 'Name, phone and photo',
-                      ),
-                      const ProfileRow(
-                        icon: Icons.lock_outline_rounded,
-                        title: 'Change password',
-                      ),
                       ProfileRow(
-                        icon: Icons.credit_card_outlined,
-                        title: 'Payment methods',
-                        // API: the saved card
-                        subtitle: 'Card ending ${controller.cardEnding}',
+                        icon: Icons.calendar_month_outlined,
+                        title: 'My bookings',
+                        subtitle: 'Requests, offers and payments',
+                        onTap: () {
+                          controller.openBookingsTab();
+                        },
                       ),
-                      // Obx: the number changes when a heart is tapped anywhere
+                      // Obx: the number changes when a heart is tapped
                       Obx(
-                            () => ProfileRow(
+                        () => ProfileRow(
                           icon: Icons.favorite_border_rounded,
                           title: 'Saved venues',
                           subtitle: favController.countText(),
-                          showDivider: false,
-                          // Opens the Saved venues screen
                           onTap: () {
                             Get.to(() => const FavouriteScreen());
+                          },
+                        ),
+                      ),
+                      // Obx: the unread number follows the notifications
+                      Obx(
+                        () => ProfileRow(
+                          icon: Icons.notifications_none_rounded,
+                          title: 'Notifications',
+                          subtitle: notificationsController.unreadText(),
+                          showDivider: false,
+                          onTap: () {
+                            Get.to(() => const NotificationsScreen());
                           },
                         ),
                       ),
@@ -196,7 +198,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 SizedBox(height: sh * 0.025),
 
-                // ── PREFERENCES (Notifications + Dark mode Switch + Language) ──
+                // ── PREFERENCES ──
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 8),
                   child: Text(
@@ -210,68 +212,17 @@ class ProfileScreen extends StatelessWidget {
                     border: Border.all(color: colors.border),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: Column(
-                    children: [
-                      ProfileRow(
-                        icon: Icons.notifications_none_rounded,
-                        title: 'Notifications',
-                        subtitle: 'Offers, messages and reminders',
-                        trailing: Obx(
-                              () => Switch(
-                            value: controller.isNotificationsOn.value,
-                            onChanged: controller.toggleNotifications,
-                          ),
-                        ),
+                  child: ProfileRow(
+                    icon: Icons.dark_mode_outlined,
+                    title: 'Dark mode',
+                    subtitle: 'Switch between light and dark',
+                    showDivider: false,
+                    trailing: Obx(
+                      () => Switch(
+                        value: themeController.isDarkMode.value,
+                        onChanged: themeController.toggleTheme,
                       ),
-                      // The dark mode Switch we built earlier.
-                      ProfileRow(
-                        icon: Icons.dark_mode_outlined,
-                        title: 'Dark mode',
-                        subtitle: 'Switch between light and dark',
-                        trailing: Obx(
-                              () => Switch(
-                            value: themeController.isDarkMode.value,
-                            onChanged: themeController.toggleTheme,
-                          ),
-                        ),
-                      ),
-                      ProfileRow(
-                        icon: Icons.language_rounded,
-                        title: 'Language',
-                        subtitle: controller.language,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: sh * 0.025),
-
-                // ── SUPPORT ──
-                Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 8),
-                  child: Text(
-                    'SUPPORT',
-                    style: AppTextStyles.labelSmall(color: colors.textMuted),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: colors.bgSurface,
-                    border: Border.all(color: colors.border),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: const Column(
-                    children: [
-                      ProfileRow(
-                        icon: Icons.help_outline_rounded,
-                        title: 'Help center',
-                      ),
-                      ProfileRow(
-                        icon: Icons.verified_user_outlined,
-                        title: 'Terms & privacy',
-                        showDivider: false,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 SizedBox(height: sh * 0.02),
@@ -288,7 +239,6 @@ class ProfileScreen extends StatelessWidget {
                     title: 'Log out',
                     isDanger: true,
                     showDivider: false,
-                    // Goes back to the Login screen
                     onTap: () {
                       controller.logOut();
                     },

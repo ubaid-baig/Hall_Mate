@@ -3,7 +3,6 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/shared/auth_controller.dart';
 import 'package:get/get.dart';
-import 'package:hall_mate/view/auth/login_screen.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
@@ -236,7 +235,14 @@ class ForgotPasswordScreen extends StatelessWidget {
                 width: double.infinity,
                 height: (sh * 0.065).clamp(48.0, 58.0),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Later (API): send the code and the new password first
+                    Get.back();
+                    Get.snackbar(
+                      'Password reset',
+                      'You can now log in with your new password',
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primary,
                     foregroundColor: colors.textOnPrimary,

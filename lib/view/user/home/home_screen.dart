@@ -10,6 +10,7 @@ import '../../../widgets/user/venue/venue_row_card.dart';
 import '../../../widgets/user/venue/venue_type_tile.dart';
 import 'notifications_screen.dart';
 import 'package:hall_mate/controller/user/venue/favourite_controller.dart';
+import 'package:hall_mate/model/venue_model.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -42,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 Column(
                   // One row for every area in the controller's list
-                  children: controller.areas.map((area) {
+                  children: controller.areas().map((area) {
                     final bool isSelected =
                         controller.selectedArea.value == area;
 
@@ -155,14 +156,13 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    // Obx: the dot disappears when hasNewNotification becomes false
+                    // Obx: the dot shows while there are unread notifications
                     Obx(
                           () => Stack(
                         children: [
                           GestureDetector(
-                            // Hides the dot, then opens the Notifications screen
+                            // Opens the Notifications screen
                             onTap: () {
-                              controller.markNotificationsSeen();
                               Get.to(() => const NotificationsScreen());
                             },
                             child: Container(
@@ -180,8 +180,8 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // API: show the dot only if there are unread notifications
-                          if (controller.hasNewNotification.value)
+                          // The dot only shows if something is unread
+                          if (controller.hasNewNotification())
                             Positioned(
                               top: 10,
                               right: 11,
@@ -210,8 +210,8 @@ class HomeScreen extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: sw * 0.05),
                 child: Text(
-                  // API: userName comes from the logged-in user
-                  'Hi ${controller.userName}, let\'s find\nyour venue',
+                  // The first name of the logged-in user
+                  'Hi ${controller.userName()}, let\'s find\nyour venue',
                   style: AppTextStyles.h1(),
                 ),
               ),
@@ -364,8 +364,7 @@ class HomeScreen extends StatelessWidget {
               // The { } body lets us work out the list first, then return a widget.
               Obx(() {
                 // Only the venues of the selected type (or all of them)
-                final List<Map<String, dynamic>> featured =
-                controller.filterByType(controller.featuredVenues);
+                final List<VenueModel> featured = controller.featuredVenues();
 
                 // Nothing of this type: show a short message instead of a gap
                 if (featured.isEmpty) {
@@ -385,11 +384,9 @@ class HomeScreen extends StatelessWidget {
                   height: 268,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    // API: the number of featured venues from the API
                     itemCount: featured.length,
                     itemBuilder: (context, index) {
-                      // API: this is one venue from the API list
-                      final venue = featured[index];
+                      final VenueModel venue = featured[index];
 
                       return Padding(
                         // The first card starts after the screen padding.
@@ -406,18 +403,13 @@ class HomeScreen extends StatelessWidget {
                             // the saved list. Then a heart tap redraws the card.
                             child: Obx(
                                   () => VenueCard(
-                                name: venue['name'],
-                                rating: venue['rating'],
-                                subtitle: venue['subtitle'],
-                                price: venue['price'],
-                                tag: venue['tag'],
+                                venue: venue,
                                 // Red heart if this venue is in the saved list
-                                isFavorite: favController.isSaved(venue['name']),
+                                isFavorite: favController.isSaved(venue.id),
                                 // Tap the heart: save or unsave this venue
                                 onFavoriteTap: () {
-                                  favController.toggleFavourite(venue);
+                                  favController.toggleFavourite(venue.id);
                                 },
-                                photoStyle: venue['photo'],
                               ),
                             ),
                           ),
@@ -436,23 +428,19 @@ class HomeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Near you', style: AppTextStyles.h3()),
-                    TextButton(
-                      // Later: open the map view
-                      onPressed: () {},
-                      child: Text(
-                        'Map view',
-                        style: AppTextStyles.titleSmall(
-                          color: colors.primaryInk,
-                        ),
+                    // Obx: the area changes when another one is picked
+                    Obx(
+                      () => Text(
+                        controller.selectedArea.value,
+                        style: AppTextStyles.caption(color: colors.textMuted),
                       ),
                     ),
                   ],
                 ),
               ),
               Obx(() {
-                // Only the nearby venues of the selected type (or all of them)
-                final List<Map<String, dynamic>> nearby =
-                controller.filterByType(controller.nearbyVenues);
+                // Only the venues in the chosen area (and of the selected type)
+                final List<VenueModel> nearby = controller.nearbyVenues();
 
                 if (nearby.isEmpty) {
                   return Padding(
@@ -468,7 +456,6 @@ class HomeScreen extends StatelessWidget {
                 }
 
                 return Column(
-                  // API: one card for every venue in the nearby list
                   children: nearby.map((venue) {
                     return Padding(
                       padding: EdgeInsets.only(
@@ -476,13 +463,7 @@ class HomeScreen extends StatelessWidget {
                         right: sw * 0.05,
                         bottom: sh * 0.015,
                       ),
-                      child: VenueRowCard(
-                        name: venue['name'],
-                        rating: venue['rating'],
-                        subtitle: venue['subtitle'],
-                        price: venue['price'],
-                        photoStyle: venue['photo'],
-                      ),
+                      child: VenueRowCard(venue: venue),
                     );
                   }).toList(),
                 );

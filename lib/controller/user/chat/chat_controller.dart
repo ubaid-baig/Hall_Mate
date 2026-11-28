@@ -1,60 +1,15 @@
 import 'package:get/get.dart';
+import 'package:hall_mate/controller/shared/app_data_controller.dart';
+import 'package:hall_mate/controller/shared/auth_controller.dart';
+import 'package:hall_mate/model/chat_model.dart';
+import 'package:hall_mate/utils/app_format.dart';
 import 'package:hall_mate/view/user/chat/chat_room_screen.dart';
 
+// The customer's chat list. The manager sees the same chats
+// in her own Chat tab (from the venue's side).
 class ChatController extends GetxController {
-  // ══════════════════════════════════════════════════════════
-  // DUMMY DATA for the Chat list screen.
-  //
-  // When you connect the API:
-  //  - GET /conversations
-  //  - 'unreadCount' > 0 makes the time green and shows the badge.
-  //  - 'avatar' is DUMMY ONLY (a colour for the circle):
-  //    emerald, marigold, slate or primary.
-  //    With the API, take the initials from the name.
-  // ══════════════════════════════════════════════════════════
-  // .obs because Obx shows the list (the unread badge goes away on open).
-  RxList<Map<String, dynamic>> conversations = <Map<String, dynamic>>[
-    {
-      'initials': 'SB',
-      'name': 'Shaan Banquet Hall',
-      'message': 'Sure, a white & gold stage is possible.',
-      'time': '4:32 pm',
-      'unreadCount': 2,
-      'avatar': 'emerald',
-    },
-    {
-      'initials': 'RP',
-      'name': 'Royal Palm Banquet',
-      'message': 'We can hold the date until tomorrow.',
-      'time': '1:10 pm',
-      'unreadCount': 0,
-      'avatar': 'marigold',
-    },
-    {
-      'initials': 'GG',
-      'name': 'Gulshan Garden Lawn',
-      'message': 'The rain backup marquee is included.',
-      'time': 'Yesterday',
-      'unreadCount': 0,
-      'avatar': 'slate',
-    },
-    {
-      'initials': 'NB',
-      'name': 'Noor Ballroom',
-      'message': 'Thank you for celebrating with us!',
-      'time': '8 Nov',
-      'unreadCount': 0,
-      'avatar': 'marigold',
-    },
-    {
-      'initials': 'HM',
-      'name': 'Hall Mate Support',
-      'message': 'Your refund has been processed.',
-      'time': '2 Nov',
-      'unreadCount': 0,
-      'avatar': 'primary',
-    },
-  ].obs;
+  final AppDataController data = Get.find<AppDataController>();
+  final AuthController auth = Get.find<AuthController>();
 
   // ── Search ──
   RxString searchText = ''.obs;
@@ -63,28 +18,30 @@ class ChatController extends GetxController {
     searchText.value = text;
   }
 
-  // The conversations whose name contains the typed text
-  List<Map<String, dynamic>> filteredConversations() {
+  // The chats whose venue name contains the typed text
+  List<ChatModel> filteredConversations() {
     final String typed = searchText.value.trim().toLowerCase();
-    if (typed.isEmpty) {
-      return conversations;
-    }
-    List<Map<String, dynamic>> result = [];
-    for (var chat in conversations) {
-      final String name = chat['name'].toLowerCase();
-      if (name.contains(typed)) {
+    List<ChatModel> result = [];
+    for (var chat in data.chatsOfCustomer(auth.userName())) {
+      if (typed.isEmpty || chat.venueName.toLowerCase().contains(typed)) {
         result.add(chat);
       }
     }
     return result;
   }
 
-  // Called when a conversation is tapped:
-  // its unread number goes to 0, then the Chat room opens.
-  // Later (API): send this conversation's id to the Chat room.
-  void openChat(Map<String, dynamic> chat) {
-    chat['unreadCount'] = 0;
-    conversations.refresh(); // tells Obx that something inside changed
-    Get.to(() => const ChatRoomScreen());
+  // "4:32 pm" or "26 Nov"
+  String timeText(ChatModel chat) {
+    final DateTime? last = chat.lastTime();
+    if (last == null) {
+      return '';
+    }
+    return AppFormat.shortTime(last);
+  }
+
+  // A chat is tapped: its unread number goes to 0, then the chat room opens
+  void openChat(ChatModel chat) {
+    data.markChatRead(chat, false);
+    Get.to(() => ChatRoomScreen(chatId: chat.id));
   }
 }

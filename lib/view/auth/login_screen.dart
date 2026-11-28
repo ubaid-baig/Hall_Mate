@@ -5,7 +5,6 @@ import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/view/auth/forgot_password_screen.dart';
 import 'package:hall_mate/view/auth/sign_up_screen.dart';
-import 'package:hall_mate/view/user/nav_bar_widget.dart';
 import '../../controller/shared/auth_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -60,6 +59,7 @@ class LoginScreen extends StatelessWidget {
                       Text('Email', style: AppTextStyles.titleSmall()),
                       SizedBox(height: sh * 0.01),
                       TextField(
+                        controller: controller.loginEmailController,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         style: AppTextStyles.bodyLarge(),
@@ -95,6 +95,7 @@ class LoginScreen extends StatelessWidget {
                       SizedBox(height: sh * 0.01),
                       Obx(
                         () => TextField(
+                          controller: controller.loginPasswordController,
                           textInputAction: TextInputAction.done,
                           obscureText: controller.isObscure.value,
                           style: AppTextStyles.bodyLarge(),
@@ -167,7 +168,9 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           TextButton(
-                            onPressed: (){Get.to(ForgotPasswordScreen());},
+                            onPressed: () {
+                              Get.to(() => const ForgotPasswordScreen());
+                            },
                             child: Text(
                               'Forgot password?',
                               style: AppTextStyles.titleSmall(
@@ -183,7 +186,9 @@ class LoginScreen extends StatelessWidget {
                         width: double.infinity,
                         height: (sh * 0.065).clamp(48.0, 58.0),
                         child: ElevatedButton(
-                          onPressed: () {Get.to(NavBarWidget());},
+                          onPressed: () {
+                            controller.logIn();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primary,
                             foregroundColor: colors.textOnPrimary,
@@ -242,7 +247,9 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: (){Get.to(SignUpScreen());},
+                      onPressed: () {
+                        Get.to(() => const SignUpScreen());
+                      },
                       child: Text(
                         'Create an account',
                         style: AppTextStyles.titleSmall(

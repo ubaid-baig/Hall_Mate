@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:hall_mate/constants/app_colors.dart';
 import 'package:hall_mate/constants/app_text_styles.dart';
 import 'package:hall_mate/controller/user/home/notifications_controller.dart';
-import 'package:hall_mate/widgets/user/home/notification_tile.dart';
+import 'package:hall_mate/model/notification_model.dart';
+import 'package:hall_mate/widgets/common/notification_tile.dart';
 
 // Notifications. Opens from the bell on the Home screen.
 class NotificationsScreen extends StatelessWidget {
@@ -14,8 +15,12 @@ class NotificationsScreen extends StatelessWidget {
     AppColors colors,
     NotificationsController controller,
     String title,
-    List<Map<String, dynamic>> items,
+    List<NotificationModel> items,
   ) {
+    // An empty group is not shown at all
+    if (items.isEmpty) {
+      return const SizedBox();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -43,11 +48,11 @@ class NotificationsScreen extends StatelessWidget {
                   controller.openNotification(item);
                 },
                 child: NotificationTile(
-                  iconType: item['iconType'],
-                  title: item['title'],
-                  message: item['message'],
-                  time: item['time'],
-                  isUnread: item['isUnread'],
+                  iconType: item.iconType,
+                  title: item.title,
+                  message: item.message,
+                  time: item.time,
+                  isUnread: item.isUnread,
                   // no line under the last row
                   showDivider: item != items.last,
                 ),
@@ -157,19 +162,19 @@ class NotificationsScreen extends StatelessWidget {
                                 colors,
                                 controller,
                                 'TODAY',
-                                controller.today,
+                                controller.group('TODAY'),
                               ),
                               _buildSection(
                                 colors,
                                 controller,
                                 'YESTERDAY',
-                                controller.yesterday,
+                                controller.group('YESTERDAY'),
                               ),
                               _buildSection(
                                 colors,
                                 controller,
                                 'EARLIER',
-                                controller.earlier,
+                                controller.group('EARLIER'),
                               ),
                             ],
                           ),
